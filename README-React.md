@@ -31,3 +31,13 @@ Logo asli berada di `public/saku-pintar-logo.png`, digunakan pada header dan fav
 - Panel mendukung tombol Batal, Escape, klik latar, dan navigasi fokus keyboard.
 
 Penyimpanan masih menggunakan localStorage pada browser, tanpa backend. Tanggal/catatan target berupa isian teks bebas sesuai referensi.
+
+## Aplikasi PWA
+
+Layout HP memenuhi lebar dan tinggi layar tanpa bingkai. Header dan navigasi bawah tetap terlihat; bagian isi dapat digulir. Safe area perangkat dan perubahan tinggi layar didukung.
+
+Untuk memasang di Android, buka URL HTTPS di Chrome lalu menu > Instal aplikasi / Tambahkan ke layar utama. Setelah dipasang, buka dari ikon SakuPintar. Petunjuk dan tombol pasang (jika disediakan browser) ada di tombol akun kanan atas. Safari iPhone: Bagikan > Tambahkan ke Layar Utama.
+
+Build produksi menghasilkan `dist/sw.js` melalui `scripts/build-sw.mjs`. Seluruh berkas aplikasi disimpan di cache saat service worker selesai dipasang, sehingga aplikasi bisa dibuka offline. `npm run dev` tidak mengaktifkan service worker; gunakan `npm run build` lalu `npm run preview` untuk mengujinya. HTTPS diperlukan saat hosting; localhost dapat dipakai untuk pengembangan. Untuk menerima versi baru, tutup semua jendela aplikasi lalu buka kembali. Data transaksi lokal tetap dipertahankan.
+
+Build dan pengujian cache offline otomatis berhasil. Pemasangan langsung pada perangkat Android/iPhone belum diverifikasi.

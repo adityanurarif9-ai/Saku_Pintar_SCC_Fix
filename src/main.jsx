@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
+import './pwa';
 import TransactionSheet from './TransactionSheet';
 
 const rupiah = value => 'Rp' + new Intl.NumberFormat('id-ID').format(value);

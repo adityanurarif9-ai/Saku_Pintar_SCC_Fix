@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import InstallApp from './InstallApp';
 
 const rupiah = value => 'Rp' + new Intl.NumberFormat('id-ID').format(value);
 function today() {
@@ -43,7 +44,7 @@ export default function TransactionSheet({ type, balance, goals, error, onClose,
   return <div className="modal-backdrop" onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
     <section ref={sheetRef} className={`modal sheet-${type}`} role="dialog" aria-modal="true" aria-labelledby="modal-title" tabIndex={-1}>
       <header className="sheet-heading"><p>{captions[type]}</p><h2 id="modal-title">{titles[type]}</h2></header>
-      {type === 'profile' ? <><img className="profile-brand" src="/saku-pintar-logo.png" alt="Saku Pintar" /><p>Teman untuk mengatur uang sakumu.</p><p className="profile-note">Versi awal dengan data contoh. Perubahan disimpan di browser perangkat ini.</p><button className="full-button" onClick={onClose}>Tutup</button></> : <form onSubmit={onSubmit}>
+      {type === 'profile' ? <><img className="profile-brand" src="/saku-pintar-logo.png" alt="Saku Pintar" /><p>Teman untuk mengatur uang sakumu.</p><p className="profile-note">Versi awal dengan data contoh. Perubahan disimpan di browser perangkat ini.</p><InstallApp /><button className="full-button" onClick={onClose}>Tutup</button></> : <form onSubmit={onSubmit}>
         <div className="form-fields">
           {type === 'income' && <>
             <label>Nominal pemasukan (Rp) *<MoneyInput name="amount" placeholder="Rp200.000" autoFocus tone="accent-blue" /></label>
