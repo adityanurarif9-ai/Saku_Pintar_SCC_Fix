@@ -17,20 +17,28 @@ function MoneyInput({ name, placeholder, required = true, autoFocus = false, ton
     }} />;
 }
 
-export default function TransactionSheet({ type, closing, balance, goals, error, onClose, onSubmit }) {
+export default function TransactionSheet({ type, account, saving, closing, balance, goals, error, onClose, onSubmit }) {
+  const [signingOut, setSigningOut] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
+  async function logout() {
+    setSigningOut(true); setLogoutError('');
+    try { await account.signOut(); }
+    catch { setLogoutError('Belum dapat keluar. Coba lagi.'); setSigningOut(false); }
+  }
   const sheetRef = useRef(null);
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
   useEffect(() => {
     const previous = document.activeElement;
     const sheet = sheetRef.current;
-    const focusable = () => [...sheet.querySelectorAll('button, input, select, textarea, [tabindex="0"]')];
+    const focusable = () => [...sheet.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]')];
     (sheet.querySelector('[autofocus]') || focusable()[0] || sheet).focus();
     function keyboard(event) {
       if (event.key === 'Escape') { event.preventDefault(); closeRef.current(); }
       if (event.key === 'Tab') {
         const elements = focusable();
         const first = elements[0], last = elements.at(-1);
+        if (!first) { event.preventDefault(); sheet.focus(); return; }
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
       }
@@ -44,7 +52,7 @@ export default function TransactionSheet({ type, closing, balance, goals, error,
   return <div className={`modal-backdrop${closing ? ' is-closing' : ''}`} onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
     <section ref={sheetRef} className={`modal sheet-${type}`} role="dialog" aria-modal="true" aria-labelledby="modal-title" tabIndex={-1}>
       <header className="sheet-heading"><p>{captions[type]}</p><h2 id="modal-title">{titles[type]}</h2></header>
-      {type === 'profile' ? <><img className="profile-brand" src="/saku-pintar-logo.png" alt="Saku Pintar" /><p>Teman untuk mengatur uang sakumu.</p><p className="profile-note">Versi awal dengan data contoh. Perubahan disimpan di browser perangkat ini.</p><InstallApp /><button className="full-button" onClick={onClose}>Tutup</button></> : <form onSubmit={onSubmit}>
+      {type === 'profile' ? <><img className="profile-brand" src="/saku-pintar-logo.png" alt="Saku Pintar" /><h3>{account.profile.display_name || 'Pengguna'}</h3><p className="profile-note">{account.profile.email}</p><span className="role-badge">{account.profile.role === 'admin' ? 'Admin' : 'Pengguna'}</span><p className="profile-note">Data dompet tersimpan di akunmu. Koneksi internet diperlukan untuk memuat dan menyimpan transaksi.</p><InstallApp />{logoutError && <p className="auth-error" role="alert">{logoutError}</p>}<button className="logout-button" disabled={signingOut} onClick={logout}>{signingOut ? 'Keluar…' : 'Keluar dari Akun'}</button><button className="cancel-button" disabled={signingOut} onClick={onClose}>Tutup</button></> : <form onSubmit={onSubmit} aria-busy={saving}>
         <div className="form-fields">
           {type === 'income' && <>
             <label>Nominal pemasukan (Rp) *<MoneyInput name="amount" placeholder="Rp200.000" autoFocus tone="accent-blue" /></label>
@@ -71,7 +79,7 @@ export default function TransactionSheet({ type, closing, balance, goals, error,
           </>}
           {error && <p className="error" role="alert">{error}</p>}
         </div>
-        <div className="form-actions"><button className="cancel-button" type="button" onClick={onClose}>Batal</button><button className="submit-button" type="submit">{buttons[type]}</button></div>
+        <div className="form-actions"><button className="cancel-button" type="button" disabled={saving || closing} onClick={onClose}>Batal</button><button className="submit-button" type="submit" disabled={saving || closing || (type === 'transfer' && !goals.length)}>{saving ? 'Menyimpan…' : buttons[type]}</button></div>
       </form>}
     </section>
   </div>;

@@ -1,6 +1,10 @@
-# SakuPintar SCC — React JS
+# SakuPintar — React + Supabase
 
-Halaman beranda berdasarkan gambar referensi. Dibuat menggunakan React dan Vite, tanpa library UI tambahan.
+Aplikasi uang saku berbasis React/Vite dengan PWA, sign in email/password, daftar akun, pemulihan password, logout, dompet per akun dan panel admin.
+
+## Mengaktifkan akun
+
+Ikuti **[PANDUAN-SUPABASE.md](PANDUAN-SUPABASE.md)**. Buat proyek Supabase, jalankan `supabase/001_auth_wallet.sql`, lalu isi `.env.local` berdasarkan `.env.example`. Login tetap dinonaktifkan sampai konfigurasi tersedia. Tidak ada akun atau password admin bawaan; promosi akun admin dilakukan oleh pengelola melalui SQL Editor.
 
 ## Menjalankan
 
@@ -10,40 +14,28 @@ npm install
 npm run dev
 ```
 
-Buka alamat Local yang muncul di terminal. Untuk hasil produksi, jalankan `npm run build`. Untuk memeriksa build, jalankan `npm run preview`.
+Build produksi: `npm run build`. Preview produksi/PWA: `npm run preview`.
+Pengujian PostgreSQL lokal untuk RLS dan aturan dompet: `npm run test:db`.
 
-## Isi proyek
+## Akses dan penyimpanan
 
-- `src/main.jsx`: komponen dan interaksi beranda, celengan, riwayat, serta formulir.
-- `src/styles.css`: tampilan sesuai referensi dan penyesuaian layar ponsel.
-- `index.html`: dokumen utama.
+- Halaman sign in tampil sebelum beranda. Pengguna baru mulai dengan saldo Rp0.
+- Profil akun menentukan peran admin/pengguna. RLS dan fungsi database memeriksa akses di server.
+- Tab Admin menampilkan daftar profil dan pencarian. Admin tidak dapat membaca dompet pengguna lain.
+- Transaksi dan target disimpan di Supabase. Data demo lama di localStorage tidak diimpor otomatis.
+- Password ditangani Supabase Auth; sesi perangkat dikelola SDK resmi.
+- PWA dapat menyimpan berkas aplikasi untuk offline. Login, profil dan transaksi memerlukan internet; dompet tidak dicache oleh service worker.
+- Tampilan mendukung layar HP, navigasi bawah, animasi panel dan pengaturan reduced motion.
 
-Saldo awal dan transaksi adalah data contoh. Tombol tambah saldo, catat pengeluaran, tambah target, dan transfer dapat digunakan. Perubahan disimpan di localStorage browser yang sama; belum ada backend atau login. Transfer mengurangi saldo dan menambah isi target, tanpa dihitung sebagai pengeluaran. Ringkasan bulanan merupakan angka demo awal ditambah transaksi yang dimasukkan, belum menghitung pergantian bulan. Halaman lanjutan bisa dikembangkan dari state `tab` di `App`.
+## Berkas utama
 
+- `src/AuthGate.jsx`, `src/AuthScreen.jsx`: gerbang sesi dan formulir akun.
+- `src/supabase.js`: client Supabase dari konfigurasi lingkungan.
+- `src/main.jsx`, `src/wallet-api.js`: beranda dan transaksi server.
+- `src/AdminPanel.jsx`: daftar akun khusus admin.
+- `src/TransactionSheet.jsx`: formulir dompet dan logout.
+- `src/InstallApp.jsx`: pemasangan aplikasi ke layar utama.
+- `supabase/001_auth_wallet.sql`: schema, trigger, RLS dan RPC.
+- `tests/auth-wallet.mjs`: pengujian SQL lokal dengan PGlite.
 
-## Pembaruan logo dan formulir
-
-Logo asli berada di `public/saku-pintar-logo.png`, digunakan pada header dan favicon. Komponen `src/TransactionSheet.jsx` berisi panel Tambah Saldo, Catat Pengeluaran, Buat Target Baru, serta transfer.
-
-- Pemasukan: nominal rupiah, sumber, tanggal dan catatan opsional.
-- Pengeluaran: nama, nominal dan kategori, dengan pencegahan saldo negatif.
-- Target: nama, target nominal, nominal awal dan target tanggal/catatan opsional. Nominal awal diambil dari saldo tersedia dan dicatat sebagai transfer.
-- Panel mendukung tombol Batal, Escape, klik latar, dan navigasi fokus keyboard.
-
-Penyimpanan masih menggunakan localStorage pada browser, tanpa backend. Tanggal/catatan target berupa isian teks bebas sesuai referensi.
-
-## Aplikasi PWA
-
-Layout HP memenuhi lebar dan tinggi layar tanpa bingkai. Header dan navigasi bawah tetap terlihat; bagian isi dapat digulir. Safe area perangkat dan perubahan tinggi layar didukung.
-
-Untuk memasang di Android, buka URL HTTPS di Chrome lalu menu > Instal aplikasi / Tambahkan ke layar utama. Setelah dipasang, buka dari ikon SakuPintar. Petunjuk dan tombol pasang (jika disediakan browser) ada di tombol akun kanan atas. Safari iPhone: Bagikan > Tambahkan ke Layar Utama.
-
-Build produksi menghasilkan `dist/sw.js` melalui `scripts/build-sw.mjs`. Seluruh berkas aplikasi disimpan di cache saat service worker selesai dipasang, sehingga aplikasi bisa dibuka offline. `npm run dev` tidak mengaktifkan service worker; gunakan `npm run build` lalu `npm run preview` untuk mengujinya. HTTPS diperlukan saat hosting; localhost dapat dipakai untuk pengembangan. Untuk menerima versi baru, tutup semua jendela aplikasi lalu buka kembali. Data transaksi lokal tetap dipertahankan.
-
-Build dan pengujian cache offline otomatis berhasil. Pemasangan langsung pada perangkat Android/iPhone belum diverifikasi.
-
-## Animasi dan pemasangan dari beranda
-
-Transisi halaman dan kartu memakai fade/slide singkat. Panel memiliki animasi masuk dan keluar, dengan penutupan 180 ms dan penjagaan agar transaksi tidak disimpan dua kali saat panel menutup. Tombol memiliki umpan balik sentuhan dan perubahan progress tabungan menggunakan transisi. Seluruh gerakan dinonaktifkan saat perangkat memilih reduced motion.
-
-Kartu pemasangan kini tersedia di beranda. Bila prompt browser tersedia, tombol memanggil instalasi; bila belum tersedia, tombol membuka panduan Android/iPhone. Pengguna tetap harus mengonfirmasi pemasangan di HP. Kartu disembunyikan ketika aplikasi dibuka dalam mode standalone atau browser mengirim appinstalled.
+Tidak ada secret key yang perlu diletakkan di frontend. Gunakan publishable key; jangan gunakan service_role key.
