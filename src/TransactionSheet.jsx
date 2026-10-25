@@ -17,7 +17,7 @@ function MoneyInput({ name, placeholder, required = true, autoFocus = false, ton
     }} />;
 }
 
-export default function TransactionSheet({ type, balance, goals, error, onClose, onSubmit }) {
+export default function TransactionSheet({ type, closing, balance, goals, error, onClose, onSubmit }) {
   const sheetRef = useRef(null);
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
@@ -41,7 +41,7 @@ export default function TransactionSheet({ type, balance, goals, error, onClose,
   const titles = { income: 'Tambah Saldo', expense: 'Catat Pengeluaran', goal: 'Buat Target Baru', transfer: 'Transfer ke Celengan', profile: 'SakuPintar' };
   const captions = { income: 'PEMASUKAN BARU', expense: 'PENGELUARAN BARU', goal: 'TARGET TABUNGAN BARU', transfer: 'ISI TABUNGAN', profile: 'TENTANG APLIKASI' };
   const buttons = { income: 'Simpan Pemasukan', expense: 'Simpan Pengeluaran', goal: 'Simpan Target', transfer: 'Simpan Transfer' };
-  return <div className="modal-backdrop" onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
+  return <div className={`modal-backdrop${closing ? ' is-closing' : ''}`} onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
     <section ref={sheetRef} className={`modal sheet-${type}`} role="dialog" aria-modal="true" aria-labelledby="modal-title" tabIndex={-1}>
       <header className="sheet-heading"><p>{captions[type]}</p><h2 id="modal-title">{titles[type]}</h2></header>
       {type === 'profile' ? <><img className="profile-brand" src="/saku-pintar-logo.png" alt="Saku Pintar" /><p>Teman untuk mengatur uang sakumu.</p><p className="profile-note">Versi awal dengan data contoh. Perubahan disimpan di browser perangkat ini.</p><InstallApp /><button className="full-button" onClick={onClose}>Tutup</button></> : <form onSubmit={onSubmit}>

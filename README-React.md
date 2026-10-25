@@ -41,3 +41,9 @@ Untuk memasang di Android, buka URL HTTPS di Chrome lalu menu > Instal aplikasi 
 Build produksi menghasilkan `dist/sw.js` melalui `scripts/build-sw.mjs`. Seluruh berkas aplikasi disimpan di cache saat service worker selesai dipasang, sehingga aplikasi bisa dibuka offline. `npm run dev` tidak mengaktifkan service worker; gunakan `npm run build` lalu `npm run preview` untuk mengujinya. HTTPS diperlukan saat hosting; localhost dapat dipakai untuk pengembangan. Untuk menerima versi baru, tutup semua jendela aplikasi lalu buka kembali. Data transaksi lokal tetap dipertahankan.
 
 Build dan pengujian cache offline otomatis berhasil. Pemasangan langsung pada perangkat Android/iPhone belum diverifikasi.
+
+## Animasi dan pemasangan dari beranda
+
+Transisi halaman dan kartu memakai fade/slide singkat. Panel memiliki animasi masuk dan keluar, dengan penutupan 180 ms dan penjagaan agar transaksi tidak disimpan dua kali saat panel menutup. Tombol memiliki umpan balik sentuhan dan perubahan progress tabungan menggunakan transisi. Seluruh gerakan dinonaktifkan saat perangkat memilih reduced motion.
+
+Kartu pemasangan kini tersedia di beranda. Bila prompt browser tersedia, tombol memanggil instalasi; bila belum tersedia, tombol membuka panduan Android/iPhone. Pengguna tetap harus mengonfirmasi pemasangan di HP. Kartu disembunyikan ketika aplikasi dibuka dalam mode standalone atau browser mengirim appinstalled.

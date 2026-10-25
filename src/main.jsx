@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 import './pwa';
 import TransactionSheet from './TransactionSheet';
+import InstallApp from './InstallApp';
 
 const rupiah = value => 'Rp' + new Intl.NumberFormat('id-ID').format(value);
 const parseMoney = value => Number(String(value || '').replace(/[^0-9]/g, ''));
@@ -40,7 +41,16 @@ function App() {
   const [modal, setModal] = useState(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  function open(type) { setError(''); setModal(type); }
+  const [closing, setClosing] = useState(false);
+  const closeTimer = useRef(null);
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+  function open(type) { clearTimeout(closeTimer.current); setClosing(false); setError(''); setModal(type); }
+  function closeModal() {
+    if (closing) return;
+    setClosing(true);
+    const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180;
+    closeTimer.current = setTimeout(() => { setModal(null); setClosing(false); }, duration);
+  }
   function save(next) {
     setData(next);
     try { localStorage.setItem('saku-pintar-scc-v1', JSON.stringify(next)); }
@@ -48,6 +58,7 @@ function App() {
   }
   function submit(event) {
     event.preventDefault();
+    if (closing) return;
     const form = new FormData(event.currentTarget);
     const amount = parseMoney(form.get('amount'));
     if (!Number.isSafeInteger(amount) || amount <= 0) return setError('Masukkan nominal rupiah bulat yang valid.');
@@ -83,7 +94,7 @@ function App() {
         activities: [activity, ...data.activities],
       });
     }
-    setModal(null);
+    closeModal();
   }
   return <div className="app-shell">
     <header className="header" inert={modal ? true : undefined}>
@@ -91,11 +102,11 @@ function App() {
       <div className="greeting"><span className="brand">SakuPintar</span><h1>Halo, selamat datang!</h1><p>Yuk, atur keuanganmu hari ini.</p></div>
       <button className="profile" aria-label="Informasi akun" onClick={() => open('profile')}><span /></button>
     </header>
-    <main inert={modal ? true : undefined}>
+    <main key={tab} className="page-content" inert={modal ? true : undefined}>
       {tab === 'Beranda' && <>
         <section className="balance-card" aria-label="Ringkasan saldo">
           <div className="balance-top"><h2>Total Saldo</h2><span>Saldo yang tersedia</span></div>
-          <p className="balance-number">{rupiah(data.balance)}</p>
+          <p key={data.balance} className="balance-number">{rupiah(data.balance)}</p>
           <div className="balance-actions"><button className="button-yellow" onClick={() => open('income')}>+ Tambah Saldo</button><button className="button-outline" onClick={() => open('transfer')}>Transfer ke Celengan</button></div>
         </section>
         <section className="summary" aria-label="Pemasukan dan pengeluaran">
@@ -114,9 +125,10 @@ function App() {
         {tab === 'Celengan' && <button className="full-button" onClick={() => open('transfer')}>Transfer ke Celengan</button>}
       </section>}
       {notice && <p role="status" className="notice">{notice}</p>}
+      {tab === 'Beranda' && <InstallApp compact />}
     </main>
     <nav className="bottom-nav" inert={modal ? true : undefined} aria-label="Navigasi utama">{['Beranda', 'Celengan', 'Riwayat'].map(name => <button key={name} className={tab === name ? 'active' : ''} aria-current={tab === name ? 'page' : undefined} onClick={() => setTab(name)}>{name}</button>)}</nav>
-    {modal && <TransactionSheet type={modal} balance={data.balance} goals={data.goals} error={error} onClose={() => setModal(null)} onSubmit={submit} />}
+    {modal && <TransactionSheet type={modal} closing={closing} balance={data.balance} goals={data.goals} error={error} onClose={closeModal} onSubmit={submit} />}
   </div>;
 }
 

@@ -5,7 +5,7 @@ window.addEventListener('beforeinstallprompt', event => {
 });
 window.addEventListener('appinstalled', () => { installPrompt = null; });
 export const getInstallPrompt = () => installPrompt;
-export const clearInstallPrompt = () => { installPrompt = null; };
+export const clearInstallPrompt = () => { installPrompt = null; window.dispatchEvent(new Event('saku-install-change')); };
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
