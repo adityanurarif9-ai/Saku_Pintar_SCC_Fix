@@ -18,7 +18,7 @@ await writeFile('dist/sw.js', `
 const CACHE = ${JSON.stringify(cacheName)};
 const FILES = ${JSON.stringify(files)};
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)));
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('sakupintar-') && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
@@ -27,7 +27,20 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
   if (event.request.mode === 'navigate') {
-    event.respondWith(caches.open(CACHE).then(cache => cache.match('/index.html')).then(response => response || fetch(event.request)));
+    // An online visit must receive the current deployment, including new build-time config.
+    // The version-matched precache remains the fallback when offline or the server fails.
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(event.request, { cache: 'no-store' });
+        if (response.ok) return response;
+        const fallback = await (await caches.open(CACHE)).match('/index.html');
+        return fallback || response;
+      } catch (error) {
+        const fallback = await (await caches.open(CACHE)).match('/index.html');
+        if (fallback) return fallback;
+        throw error;
+      }
+    })());
   } else if (FILES.includes(url.pathname)) {
     event.respondWith(caches.open(CACHE).then(cache => cache.match(url.pathname)).then(response => response || fetch(event.request)));
   }
