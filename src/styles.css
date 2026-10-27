@@ -170,6 +170,33 @@ textarea { resize: vertical; min-height: 52px; max-height: 120px; line-height: 1
 .member-list h3 { font-size: 13px; line-height: 19px; }.member-list p { font-size: 11px; line-height: 18px; color: #7183a3; overflow-wrap: anywhere; }.member-list small { font-size: 10px; color: #7183a3; }
 .empty-state { font-size: 12px; color: #7183a3; padding: 16px; line-height: 20px; }
 .logout-button { width: 100%; min-height: 46px; margin-top: 20px; background: #fff1f2; color: #c72335; border: 1px solid #ffd7dc; border-radius: 12px; font-size: 12px; font-weight: 700; }
+.expense-entry { margin: 14px 0 15px; padding: 13px; background: #fff4ed; border: 1px solid #ffdfce; border-radius: 19px; }
+.expense-entry-intro { display: flex; align-items: center; gap: 6px; margin: 0 0 9px; color: #8b4d37; font-size: 11px; line-height: 17px; font-weight: 600; }
+.expense-entry-dot { width: 6px; height: 6px; background: #dc442e; border-radius: 50%; flex-shrink: 0; }
+.expense-primary { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 13px 14px; background: linear-gradient(115deg,#d9432d,#c63727); color: #fff; border: 0; border-radius: 13px; box-shadow: 0 5px 13px #d9432d25; text-align: left; }
+.expense-primary-icon { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #ffffff38; border-radius: 13px; background: #ffffff14; flex-shrink: 0; }
+.expense-primary-copy { display: grid; gap: 5px; flex: 1; min-width: 0; }
+.expense-primary-copy strong { font-size: 17px; line-height: 21px; letter-spacing: -.2px; }.expense-primary-copy > span { font-size: 11px; line-height: 16px; color: #fff1e8; }
+.expense-primary-arrow { font-size: 25px; font-weight: 400; line-height: 1; }
+.quick-actions.savings-actions { grid-template-columns: 1fr 1fr; gap: 9px; }
+.quick-actions.savings-actions button { justify-content: flex-start; gap: 8px; text-align: left; min-height: 70px; padding: 10px; font-size: 11px; }
+.savings-actions small { display: block; font-size: 9px; line-height: 14px; font-weight: 400; color: #7183a3; margin-top: 4px; }
+.savings-action-icon { display: grid; place-items: center; width: 31px; height: 33px; flex-shrink: 0; border-radius: 10px; color: #2860f5; background: #ecf2ff; font-size: 20px; }.target-action-icon { color: #9060ce; background: #f3edfc; }
+.expense-dock { position: absolute; z-index: 8; bottom: calc(var(--nav-height) + 12px); left: 18px; right: 18px; min-height: 52px; background: #ce3b29; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 14px; border: 2px solid #fff; border-radius: 16px; box-shadow: 0 6px 22px #b1332638; font-size: 14px; font-weight: 700; animation: page-in 160ms ease-out both; }
+.expense-dock > span:not(.dock-plus) { flex: 1; text-align: left; }.dock-plus { background: #ffffff20; border-radius: 8px; display: grid; place-items: center; width: 28px; height: 28px; font-size: 21px; font-weight: 400; }
+main.with-expense-dock { padding-bottom: 88px; }.toast-message.toast-above-dock { bottom: calc(var(--nav-height) + 76px); }
+.sheet-expense { border-top: 3px solid #e68765; }
+.sheet-expense { padding-top: 22px; padding-bottom: 20px; }
+.sheet-expense .sheet-heading { position: relative; padding-left: 52px; padding-right: 28px; margin-bottom: 16px; }.sheet-expense .sheet-heading > p { color: #bd3f2c; }.sheet-expense h2 { font-size: 20px; line-height: 26px; }
+.expense-sheet-icon { position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 40px; height: 40px; background: #fff0e8; border: 1px solid #ffe1d3; color: #ce3b29; border-radius: 13px; }
+.expense-sheet-close { position: absolute; top: 0; right: -3px; width: 38px; height: 38px; color: #7183a3; background: #f5f7fb; border: 1px solid #e5eaf2; border-radius: 50%; font-size: 25px; line-height: 1; }
+.expense-sheet-description { font-size: 12px; line-height: 19px; color: #7183a3; margin-top: 10px; margin-left: -52px; }
+.expense-presets { margin-bottom: 14px; }.expense-presets > p { font-size: 11px; font-weight: 700; color: #526783; margin-bottom: 7px; }.expense-presets > div { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; }
+.expense-presets button { min-height: 51px; padding: 6px 3px; border: 1px solid #e1e7f0; border-radius: 12px; background: #fff; color: #526783; font-size: 10px; line-height: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }.expense-presets button > span { font-size: 18px; }.expense-presets .selected { background: #fff3eb; border-color: #e9a083; color: #b63d29; font-weight: 700; }
+.sheet-expense form label { font-size: 12px; line-height: 17px; margin-bottom: 12px; }.sheet-expense input,.sheet-expense select { font-size: 16px; min-height: 46px; }.sheet-expense .money-input { font-size: 20px; background: #fff9f6; border-color: #f0bea9; color: #c53726; min-height: 55px; }.sheet-expense .money-input::placeholder { color: #bb8072; font-size: 20px; }
+.expense-balance-note { padding: 12px; background: #f4f7fc; border: 1px solid #e2e9f4; border-radius: 12px; margin: 3px 0 9px; font-size: 11px; line-height: 17px; color: #7183a3; }.expense-balance-note > span { display: flex; align-items: center; justify-content: space-between; gap: 10px; }.expense-balance-note strong { color: #183556; font-size: 12px; }.expense-balance-note p { margin-top: 4px; font-size: 10px; }
+.sheet-expense .submit-button { background: #ce3b29; }.sheet-expense .form-actions { margin-top: 16px; }.sheet-expense .form-actions button { min-height: 48px; }
+@media (max-width: 360px) { .expense-entry { padding: 10px; }.expense-primary { padding: 12px 10px; gap: 8px; }.expense-primary-copy strong { font-size: 15px; }.expense-primary-copy > span { font-size: 10px; }.expense-primary-icon { width: 38px; height: 40px; }.expense-primary-arrow { display: none; }.quick-actions.savings-actions button { gap: 6px; padding: 8px; }.savings-actions small { font-size: 8px; } }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .busy-label { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 700ms linear infinite; }

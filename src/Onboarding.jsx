@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 const steps = [
   { eyebrow: 'SELAMAT DATANG', title: 'Kenalan dulu, yuk!', text: 'SakuPintar bantu kamu mencatat uang saku dan menabung. Mulai dari hal kecil, lakukan setiap hari.', icon: 'wallet', hint: 'Data dompet terpisah untuk setiap akun.' },
   { eyebrow: 'LANGKAH 1 · CATAT UANG MASUK', title: 'Uang masuk, langsung catat.', text: 'Ketuk Tambah Saldo saat menerima uang saku, gaji, atau hadiah. Isi nominal dan sumbernya, lalu simpan.', icon: 'plus', hint: 'Saldo awal akun baru Rp0. Tambahkan pemasukan pertamamu.' },
-  { eyebrow: 'LANGKAH 2 · KENALI KEBIASAANMU', title: 'Tahu uangmu ke mana.', text: 'Catat pengeluaran dan pilih kategorinya. Di Riwayat, kamu bisa mencari transaksi, menyaring bulan, dan mengekspor CSV.', icon: 'chart', hint: 'Ringkasan kategori membantu melihat pengeluaran bulan ini.' },
+  { eyebrow: 'LANGKAH 2 · KENALI KEBIASAANMU', title: 'Habis jajan? Catat di sini.', text: 'Ketuk Catat Pengeluaran di bawah saldo. Pilih Makan/minum atau kategori lain, isi nominal, lalu simpan. Tombol cepat juga tersedia saat halaman digulir.', icon: 'chart', hint: 'Semua catatan bisa dicari kembali melalui Riwayat.' },
   { eyebrow: 'LANGKAH 3 · WUJUDKAN TARGET', title: 'Sedikit-sedikit, jadi tujuan.', text: 'Buat target di Celengan, lalu pindahkan sebagian saldo ke tabungan. Nominal awal dan transfer diambil dari saldo yang tersedia.', icon: 'target', hint: 'Tutorial ini bisa dibuka lagi melalui menu akun.' },
 ];
 function Illustration({ type }) {

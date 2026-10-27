@@ -9,6 +9,7 @@ import History, { ActivityList } from './History';
 import ExpenseSummary from './ExpenseSummary';
 import { readPreferences, savePreference } from './preferences';
 import { jakartaMonth, monthLabel } from './history-utils';
+import ExpenseEntry, { ExpenseDock } from './ExpenseEntry';
 
 const defaultApi = { load: loadWallet, submit: submitWallet };
 const rupiah = value => 'Rp' + new Intl.NumberFormat('id-ID').format(value);
@@ -58,9 +59,21 @@ export default function Dashboard({ account, api = defaultApi }) {
     return () => { active = false; };
   }, [account.user.id, reload, api]);
   const [tab, setTab] = useState('Beranda');
+  const mainRef = useRef(null);
+  const expenseRef = useRef(null);
+  const [expenseVisible, setExpenseVisible] = useState(true);
+  useEffect(() => {
+    if (tab !== 'Beranda') { setExpenseVisible(false); return; }
+    if (!expenseRef.current || !mainRef.current) { setExpenseVisible(true); return; }
+    if (!('IntersectionObserver' in window)) { setExpenseVisible(false); return; }
+    const observer = new IntersectionObserver(([entry]) => setExpenseVisible(entry.isIntersecting && entry.intersectionRatio >= .4), { root: mainRef.current, threshold: [0, .4] });
+    observer.observe(expenseRef.current);
+    return () => observer.disconnect();
+  }, [tab, walletLoading, walletFailure]);
   useEffect(() => { document.title = `${tab} — SakuPintar`; }, [tab]);
   const [modal, setModal] = useState(null);
   const blocked = Boolean(modal || tutorialVisible);
+  const showExpenseDock = !blocked && !walletLoading && !walletFailure && tab !== 'Admin' && !expenseVisible;
   const [error, setError] = useState('');
   const [notice, setNotice] = useState(null);
   const notify = message => setNotice({ message, id: Date.now() });
@@ -91,7 +104,7 @@ export default function Dashboard({ account, api = defaultApi }) {
       setData(next);
       submitLock.current = false;
       closeModal();
-      notify('Berhasil disimpan ke akunmu.');
+      notify(modal === 'expense' ? 'Pengeluaran berhasil dicatat.' : 'Berhasil disimpan ke akunmu.');
     } catch (error) { setError(walletMessage(error)); }
     finally { submitLock.current = false; setSaving(false); }
   }
@@ -101,7 +114,7 @@ export default function Dashboard({ account, api = defaultApi }) {
       <div className="greeting"><span className="brand">SakuPintar{account.profile.role === 'admin' ? ' • Admin' : ''}</span><h1>Halo, {account.profile.display_name || 'teman'}!</h1><p>Yuk, atur keuanganmu hari ini.</p></div>
       <button className="profile" aria-label="Informasi akun" onClick={() => open('profile')}><span /></button>
     </header>
-    <main key={tab} className="page-content" inert={blocked ? true : undefined}>
+    <main key={tab} ref={mainRef} className={`page-content${showExpenseDock ? ' with-expense-dock' : ''}`} inert={blocked ? true : undefined}>
       {tab === 'Admin' && account.profile.role === 'admin' ? <AdminPanel /> : walletLoading ? <WalletSkeleton /> : walletFailure ? <section><p className="auth-error" role="alert">{walletFailure}</p><button className="full-button" onClick={() => setReload(value => value + 1)}>Coba Lagi</button></section> : <>
       <div className="wallet-toolbar"><span>{monthLabel(jakartaMonth())}</span><button onClick={() => { setNotice(null); setReload(value => value + 1); }} aria-label="Muat ulang data dompet">↻ Perbarui</button></div>
       {tab === 'Beranda' && <>
@@ -110,11 +123,12 @@ export default function Dashboard({ account, api = defaultApi }) {
           <p key={`${data.balance}-${hidden}`} className="balance-number">{money(data.balance)}</p>
           <div className="balance-actions"><button className="button-yellow" onClick={() => open('income')}>+ Tambah Saldo</button><button className="button-outline" onClick={() => open('transfer')}>Transfer ke Celengan</button></div>
         </section>
+        <ExpenseEntry buttonRef={expenseRef} onClick={() => open('expense')} />
         <section className="summary" aria-label="Pemasukan dan pengeluaran">
           <article><span className="stat-icon incoming">↓</span><div><h2>Pemasukan</h2><strong className="green">{money(data.income)}</strong><p>Bulan ini</p></div></article>
           <article><span className="stat-icon outgoing">↑</span><div><h2>Pengeluaran</h2><strong className="red">{money(data.expense)}</strong><p>Bulan ini</p></div></article>
         </section>
-        <section className="quick-section"><h2 className="eyebrow">AKSI CEPAT</h2><div className="quick-actions"><button onClick={() => open('income')}>Tambah Saldo</button><button onClick={() => open('expense')}>Catat Pengeluaran</button><button onClick={() => open('goal')}>Tambah Target</button></div></section>
+        <section className="quick-section"><h2 className="eyebrow">RENCANAKAN TABUNGANMU</h2><div className="quick-actions savings-actions"><button onClick={() => open('transfer')}><span className="savings-action-icon" aria-hidden="true">↗</span><span>Isi Celengan<small>Pindahkan saldo ke tabungan</small></span></button><button onClick={() => open('goal')}><span className="savings-action-icon target-action-icon" aria-hidden="true">◎</span><span>Buat Target<small>Mulai tujuan tabunganmu</small></span></button></div></section>
       </>}
       {tab === 'Beranda' && <section className="activity-section">
         <div className="section-heading"><h2>Aktivitas Terakhir</h2><button onClick={() => setTab('Riwayat')}>Lihat Semua</button></div>
@@ -132,7 +146,8 @@ export default function Dashboard({ account, api = defaultApi }) {
       </>}
     </main>
     <nav className={`bottom-nav${account.profile.role === 'admin' ? ' admin-nav' : ''}`} inert={blocked ? true : undefined} aria-label="Navigasi utama">{['Beranda', 'Celengan', 'Riwayat', ...(account.profile.role === 'admin' ? ['Admin'] : [])].map(name => <button key={name} className={tab === name ? 'active' : ''} aria-current={tab === name ? 'page' : undefined} onClick={() => setTab(name)}>{name}</button>)}</nav>
-    {notice && !blocked && <p className="toast-message" role="status" key={notice.id}>✓ {notice.message}</p>}
+    {showExpenseDock && <ExpenseDock onClick={() => open('expense')} />}
+    {notice && !blocked && <p className={`toast-message${showExpenseDock ? ' toast-above-dock' : ''}`} role="status" key={notice.id}>✓ {notice.message}</p>}
     {modal && <TransactionSheet type={modal} account={account} onReplayTutorial={replayTutorial} saving={saving} closing={closing} balance={data.balance} goals={data.goals} error={error} onClose={closeModal} onSubmit={submit} />}
     {tutorialVisible && <Onboarding onFinish={finishTutorial} />}
   </div>;

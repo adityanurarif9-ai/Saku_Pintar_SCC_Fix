@@ -53,3 +53,11 @@ Tidak ada secret key yang perlu diletakkan di frontend. Gunakan publishable key;
 Komponen beranda kini di `src/Dashboard.jsx`; `src/main.jsx` hanya memasang gerbang autentikasi. Komponen baru: `Loading.jsx`, `Onboarding.jsx`, `History.jsx`, `ExpenseSummary.jsx`. Pengujian fitur: `npm run test:features`. Pengujian pembaruan PWA sesudah build: `node tests/pwa-update.mjs`.
 
 Pemeriksaan antarmuka dilakukan memakai data contoh lokal; tidak membuat akun baru atau mengubah data Supabase pengguna.
+
+## Pencatatan pengeluaran yang mudah ditemukan
+
+Tombol Catat Pengeluaran berukuran besar berada langsung di bawah kartu saldo, dengan contoh makan/jajan/bayar sesuatu. Aksi tabungan dipisah ke bagian Rencanakan Tabunganmu. Ketika tombol utama tidak terlihat akibat scroll, atau pengguna membuka Celengan/Riwayat, tombol pengeluaran cepat muncul di atas navigasi. Tombol tidak ditampilkan saat loading, error, tutorial, panel admin atau formulir terbuka.
+
+Formulir pengeluaran memiliki pilihan cepat Makan/minum, Transportasi, dan Belanja. Pilihan mengisi nama/kategori dan memindahkan fokus ke nominal; pengguna tetap dapat mengeditnya. Saldo tersedia ditampilkan sebagai informasi netral, sedangkan pesan kesalahan hanya muncul ketika ada kesalahan. Validasi saldo dan penyimpanan Supabase tetap melalui RPC yang sama.
+
+Pemeriksaan UI memakai data contoh lokal: tombol utama, preset makan/minum, format rupiah, simpan dan pembaruan saldo, akses cepat dari Riwayat, serta kemunculan tombol saat scroll. Tidak membuat atau mengubah transaksi Supabase pengguna.

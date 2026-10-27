@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import InstallApp from './InstallApp';
 import { BusyLabel } from './Loading';
+import { ReceiptIcon } from './ExpenseEntry';
 
 const rupiah = value => 'Rp' + new Intl.NumberFormat('id-ID').format(value);
 function today() {
@@ -8,9 +9,9 @@ function today() {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-function MoneyInput({ name, placeholder, required = true, autoFocus = false, tone = '' }) {
+function MoneyInput({ name, placeholder, required = true, autoFocus = false, tone = '', inputRef, disabled = false }) {
   const [value, setValue] = useState('');
-  return <input name={name} type="text" inputMode="numeric" autoFocus={autoFocus} required={required}
+  return <input ref={inputRef} disabled={disabled} name={name} type="text" inputMode="numeric" autoFocus={autoFocus} required={required}
     className={`money-input ${tone}`} placeholder={placeholder} value={value} maxLength={23}
     onChange={event => {
       const digits = event.target.value.replace(/[^0-9]/g, '').slice(0, 12);
@@ -21,6 +22,13 @@ function MoneyInput({ name, placeholder, required = true, autoFocus = false, ton
 export default function TransactionSheet({ type, account, onReplayTutorial, saving, closing, balance, goals, error, onClose, onSubmit }) {
   const [signingOut, setSigningOut] = useState(false);
   const [logoutError, setLogoutError] = useState('');
+  const [expenseName, setExpenseName] = useState('');
+  const [expenseCategory, setExpenseCategory] = useState('');
+  const expenseAmountRef = useRef(null);
+  function chooseExpense(name, category) {
+    setExpenseName(name); setExpenseCategory(category);
+    expenseAmountRef.current?.focus();
+  }
   async function logout() {
     setSigningOut(true); setLogoutError('');
     try { await account.signOut(); }
@@ -33,7 +41,7 @@ export default function TransactionSheet({ type, account, onReplayTutorial, savi
     const previous = document.activeElement;
     const sheet = sheetRef.current;
     const focusable = () => [...sheet.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]')];
-    (sheet.querySelector('[autofocus]') || focusable()[0] || sheet).focus();
+    (sheet.querySelector('input[name="name"], select[name="goal"], input[name="amount"]') || focusable()[0] || sheet).focus();
     function keyboard(event) {
       if (event.key === 'Escape') { event.preventDefault(); closeRef.current(); }
       if (event.key === 'Tab') {
@@ -52,7 +60,7 @@ export default function TransactionSheet({ type, account, onReplayTutorial, savi
   const buttons = { income: 'Simpan Pemasukan', expense: 'Simpan Pengeluaran', goal: 'Simpan Target', transfer: 'Simpan Transfer' };
   return <div className={`modal-backdrop${closing ? ' is-closing' : ''}`} onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
     <section ref={sheetRef} className={`modal sheet-${type}`} role="dialog" aria-modal="true" aria-labelledby="modal-title" tabIndex={-1}>
-      <header className="sheet-heading"><p>{captions[type]}</p><h2 id="modal-title">{titles[type]}</h2></header>
+      <header className="sheet-heading">{type === 'expense' && <><span className="expense-sheet-icon"><ReceiptIcon size={24} /></span><button className="expense-sheet-close" type="button" aria-label="Tutup catat pengeluaran" disabled={saving || closing} onClick={onClose}>×</button></>}<p>{captions[type]}</p><h2 id="modal-title">{titles[type]}</h2>{type === 'expense' && <div className="expense-sheet-description">Catat uang yang baru dipakai. Setelah disimpan, saldo akan berkurang sesuai nominalnya.</div>}</header>
       {type === 'profile' ? <><img className="profile-brand" src="/saku-pintar-logo.png" alt="Saku Pintar" /><h3>{account.profile.display_name || 'Pengguna'}</h3><p className="profile-note">{account.profile.email}</p><span className="role-badge">{account.profile.role === 'admin' ? 'Admin' : 'Pengguna'}</span><p className="profile-note">Data dompet tersimpan di akunmu. Koneksi internet diperlukan untuk memuat dan menyimpan transaksi.</p><button className="replay-tutorial" disabled={signingOut} onClick={onReplayTutorial}>Buka panduan penggunaan</button><InstallApp />{logoutError && <p className="auth-error" role="alert">{logoutError}</p>}<button className="logout-button" disabled={signingOut} onClick={logout}>{signingOut ? <BusyLabel>Keluar…</BusyLabel> : 'Keluar dari Akun'}</button><button className="cancel-button" disabled={signingOut} onClick={onClose}>Tutup</button></> : <form onSubmit={onSubmit} aria-busy={saving}>
         <div className="form-fields">
           {type === 'income' && <>
@@ -62,10 +70,11 @@ export default function TransactionSheet({ type, account, onReplayTutorial, savi
             <label>Catatan (opsional)<textarea name="notes" placeholder="Uang saku mingguan" maxLength={300} /></label>
           </>}
           {type === 'expense' && <>
-            <label>Nama pengeluaran *<input name="name" placeholder="Beli Makan Siang" maxLength={60} required autoFocus /></label>
-            <label>Nominal (Rp) *<MoneyInput name="amount" placeholder="Rp15.000" tone="accent-red" /></label>
-            <label>Kategori *<select name="category" defaultValue="" required><option value="" disabled>Makanan • Transportasi • Pendidikan • Hiburan</option>{['Makanan', 'Transportasi', 'Pendidikan', 'Hiburan', 'Belanja', 'Lainnya'].map(category => <option key={category}>{category}</option>)}</select></label>
-            <p className="validation-note">Validasi: Cegah saldo negatif jika melebihi {rupiah(balance)}</p>
+            <div className="expense-presets"><p>Mau catat apa? Pilih cepat:</p><div aria-label="Contoh pengeluaran">{[['🍜','Makan / minum','Beli makan / minum','Makanan'],['🚌','Transportasi','Ongkos transportasi','Transportasi'],['🛍','Belanja','Belanja','Belanja']].map(([icon,label,name,category]) => <button key={category} type="button" disabled={saving || closing} aria-pressed={expenseCategory === category} className={expenseCategory === category ? 'selected' : ''} onClick={() => chooseExpense(name, category)}><span aria-hidden="true">{icon}</span>{label}</button>)}</div></div>
+            <label>Untuk apa pengeluarannya? *<input disabled={saving || closing} name="name" placeholder="Contoh: Beli makan siang" maxLength={60} required autoFocus value={expenseName} onChange={event => setExpenseName(event.target.value)} /></label>
+            <label>Berapa uang yang dipakai? (Rp) *<MoneyInput disabled={saving || closing} inputRef={expenseAmountRef} name="amount" placeholder="Rp15.000" tone="accent-red" /></label>
+            <label>Kategori pengeluaran *<select disabled={saving || closing} name="category" value={expenseCategory} onChange={event => setExpenseCategory(event.target.value)} required><option value="" disabled>Pilih kategori pengeluaran</option>{['Makanan', 'Transportasi', 'Pendidikan', 'Hiburan', 'Belanja', 'Lainnya'].map(category => <option key={category}>{category}</option>)}</select></label>
+            <div className="expense-balance-note"><span>Saldo tersedia <strong>{rupiah(balance)}</strong></span><p>Nominal pengeluaran tidak boleh melebihi saldo.</p></div>
           </>}
           {type === 'goal' && <>
             <label>Nama barang atau target *<input name="name" placeholder="Laptop Kuliah" maxLength={60} required autoFocus className="accent-blue" /></label>
