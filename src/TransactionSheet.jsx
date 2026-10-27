@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import InstallApp from './InstallApp';
+import { BusyLabel } from './Loading';
 
 const rupiah = value => 'Rp' + new Intl.NumberFormat('id-ID').format(value);
 function today() {
@@ -17,7 +18,7 @@ function MoneyInput({ name, placeholder, required = true, autoFocus = false, ton
     }} />;
 }
 
-export default function TransactionSheet({ type, account, saving, closing, balance, goals, error, onClose, onSubmit }) {
+export default function TransactionSheet({ type, account, onReplayTutorial, saving, closing, balance, goals, error, onClose, onSubmit }) {
   const [signingOut, setSigningOut] = useState(false);
   const [logoutError, setLogoutError] = useState('');
   async function logout() {
@@ -52,7 +53,7 @@ export default function TransactionSheet({ type, account, saving, closing, balan
   return <div className={`modal-backdrop${closing ? ' is-closing' : ''}`} onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
     <section ref={sheetRef} className={`modal sheet-${type}`} role="dialog" aria-modal="true" aria-labelledby="modal-title" tabIndex={-1}>
       <header className="sheet-heading"><p>{captions[type]}</p><h2 id="modal-title">{titles[type]}</h2></header>
-      {type === 'profile' ? <><img className="profile-brand" src="/saku-pintar-logo.png" alt="Saku Pintar" /><h3>{account.profile.display_name || 'Pengguna'}</h3><p className="profile-note">{account.profile.email}</p><span className="role-badge">{account.profile.role === 'admin' ? 'Admin' : 'Pengguna'}</span><p className="profile-note">Data dompet tersimpan di akunmu. Koneksi internet diperlukan untuk memuat dan menyimpan transaksi.</p><InstallApp />{logoutError && <p className="auth-error" role="alert">{logoutError}</p>}<button className="logout-button" disabled={signingOut} onClick={logout}>{signingOut ? 'Keluar…' : 'Keluar dari Akun'}</button><button className="cancel-button" disabled={signingOut} onClick={onClose}>Tutup</button></> : <form onSubmit={onSubmit} aria-busy={saving}>
+      {type === 'profile' ? <><img className="profile-brand" src="/saku-pintar-logo.png" alt="Saku Pintar" /><h3>{account.profile.display_name || 'Pengguna'}</h3><p className="profile-note">{account.profile.email}</p><span className="role-badge">{account.profile.role === 'admin' ? 'Admin' : 'Pengguna'}</span><p className="profile-note">Data dompet tersimpan di akunmu. Koneksi internet diperlukan untuk memuat dan menyimpan transaksi.</p><button className="replay-tutorial" disabled={signingOut} onClick={onReplayTutorial}>Buka panduan penggunaan</button><InstallApp />{logoutError && <p className="auth-error" role="alert">{logoutError}</p>}<button className="logout-button" disabled={signingOut} onClick={logout}>{signingOut ? <BusyLabel>Keluar…</BusyLabel> : 'Keluar dari Akun'}</button><button className="cancel-button" disabled={signingOut} onClick={onClose}>Tutup</button></> : <form onSubmit={onSubmit} aria-busy={saving}>
         <div className="form-fields">
           {type === 'income' && <>
             <label>Nominal pemasukan (Rp) *<MoneyInput name="amount" placeholder="Rp200.000" autoFocus tone="accent-blue" /></label>
@@ -79,7 +80,7 @@ export default function TransactionSheet({ type, account, saving, closing, balan
           </>}
           {error && <p className="error" role="alert">{error}</p>}
         </div>
-        <div className="form-actions"><button className="cancel-button" type="button" disabled={saving || closing} onClick={onClose}>Batal</button><button className="submit-button" type="submit" disabled={saving || closing || (type === 'transfer' && !goals.length)}>{saving ? 'Menyimpan…' : buttons[type]}</button></div>
+        <div className="form-actions"><button className="cancel-button" type="button" disabled={saving || closing} onClick={onClose}>Batal</button><button className="submit-button" type="submit" disabled={saving || closing || (type === 'transfer' && !goals.length)}>{saving ? <BusyLabel>Menyimpan…</BusyLabel> : buttons[type]}</button></div>
       </form>}
     </section>
   </div>;

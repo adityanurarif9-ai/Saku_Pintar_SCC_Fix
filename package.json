@@ -7,7 +7,9 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build && node scripts/build-sw.mjs",
     "preview": "vite preview --host 127.0.0.1",
-    "test:db": "node tests/auth-wallet.mjs"
+    "test:db": "node tests/auth-wallet.mjs",
+    "test:history": "node --test tests/history.mjs",
+    "test:features": "node --test tests/history.mjs tests/preferences.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase, authConfigured, authMessage } from './supabase';
 import InstallApp from './InstallApp';
+import { BusyLabel } from './Loading';
 
 export default function AuthScreen({ recovery = false, onRecovered }) {
   const [mode, setMode] = useState(recovery ? 'reset' : 'login');
@@ -50,7 +51,7 @@ export default function AuthScreen({ recovery = false, onRecovered }) {
     <section className="auth-card">
       {!recovery && <div className="auth-tabs" aria-label="Pilihan akun"><button type="button" aria-pressed={mode === 'login'} className={mode === 'login' ? 'selected' : ''} disabled={busy} onClick={() => change('login')}>Masuk</button><button type="button" aria-pressed={mode === 'signup'} className={mode === 'signup' ? 'selected' : ''} disabled={busy} onClick={() => change('signup')}>Daftar</button></div>}
       {!authConfigured && <p className="setup-note" role="status">Login belum diaktifkan oleh pengelola. Konfigurasi Supabase diperlukan sebelum akun bisa digunakan.</p>}
-      <form key={mode} onSubmit={submit}>
+      <form key={mode} onSubmit={submit} aria-busy={busy}>
         {mode === 'signup' && <label>Nama lengkap<input name="name" placeholder="Nama kamu" maxLength={60} autoComplete="name" required /></label>}
         {mode !== 'reset' && <label>Email<input name="email" type="email" placeholder="nama@email.com" autoComplete="email" maxLength={254} required /></label>}
         {mode !== 'forgot' && <>
@@ -60,7 +61,7 @@ export default function AuthScreen({ recovery = false, onRecovered }) {
         {mode === 'login' && <button className="forgot-link" type="button" disabled={busy} onClick={() => change('forgot')}>Lupa password?</button>}
         {error && <p role="alert" className="auth-error">{error}</p>}
         {message && <p role="status" className="auth-message">{message}</p>}
-        <button className="full-button auth-submit" type="submit" disabled={busy || !authConfigured}>{busy ? 'Memproses…' : mode === 'login' ? 'Masuk ke SakuPintar' : mode === 'signup' ? 'Buat Akun' : mode === 'forgot' ? 'Kirim Tautan Pemulihan' : 'Simpan Password Baru'}</button>
+        <button className="full-button auth-submit" type="submit" disabled={busy || !authConfigured}>{busy ? <BusyLabel>Memproses…</BusyLabel> : mode === 'login' ? 'Masuk ke SakuPintar' : mode === 'signup' ? 'Buat Akun' : mode === 'forgot' ? 'Kirim Tautan Pemulihan' : 'Simpan Password Baru'}</button>
         {mode === 'forgot' && <button type="button" className="cancel-button" disabled={busy} onClick={() => change('login')}>Kembali ke Masuk</button>}
       </form>
       <p className="auth-footnote">Admin dan pengguna masuk melalui halaman yang sama. Akses mengikuti peran akun.</p>

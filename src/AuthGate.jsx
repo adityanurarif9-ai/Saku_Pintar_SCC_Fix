@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AuthScreen from './AuthScreen';
 import { supabase, authConfigured } from './supabase';
+import LoadingScreen from './Loading';
 
 export default function AuthGate({ children }) {
   const [session, setSession] = useState(null);
@@ -45,7 +46,7 @@ export default function AuthGate({ children }) {
   }
   if (problem && !recovery) return <div className="app-shell auth-shell"><main className="auth-main"><section className="auth-card"><h1>Belum terhubung</h1><p className="auth-error" role="alert">{problem}</p><button className="full-button" onClick={() => { setProblem(''); if (session) setAttempt(value => value + 1); else window.location.reload(); }}>Coba Lagi</button>{session && <button className="cancel-button" onClick={() => signOut().catch(() => setProblem('Keluar belum berhasil. Coba lagi.'))}>Keluar</button>}</section></main></div>;
   if (recovery) return <AuthScreen key="reset" recovery onRecovered={() => setRecovery(false)} />;
-  if (checking || (session && (!profile || profile.id !== session.user.id))) return <div className="app-shell auth-loading" role="status"><img src="/icons/icon-192.png" alt="" width="80" height="80" /><span>Menyiapkan SakuPintar…</span></div>;
+  if (checking || (session && (!profile || profile.id !== session.user.id))) return <LoadingScreen label={checking ? 'Memeriksa sesi akunmu…' : 'Menyiapkan profil dan dompetmu…'} />;
   if (!session) return <AuthScreen />;
   return children({ user: session.user, profile, signOut });
 }

@@ -39,3 +39,17 @@ Pengujian PostgreSQL lokal untuk RLS dan aturan dompet: `npm run test:db`.
 - `tests/auth-wallet.mjs`: pengujian SQL lokal dengan PGlite.
 
 Tidak ada secret key yang perlu diletakkan di frontend. Gunakan publishable key; jangan gunakan service_role key.
+
+## Loading, tutorial, dan fitur harian
+
+- Loading awal tersedia sebelum JavaScript selesai dimuat. Pemeriksaan sesi memakai splash beranimasi; pemuatan dompet memakai skeleton; proses login dan simpan memiliki spinner. Tidak ada durasi loading buatan.
+- Tutorial empat langkah tampil setelah data akun berhasil dimuat untuk pertama kali di browser/perangkat tersebut. Bisa dilewati dan dibuka ulang melalui akun > Buka panduan penggunaan. Status tutorial disimpan di localStorage terpisah menurut ID pengguna; perangkat/browser lain akan mendapat tutorial lagi. Tidak ada perubahan schema Supabase.
+- Tombol sembunyikan nominal menyamarkan angka di beranda, target, riwayat dan ringkasan kategori. Preferensinya disimpan per akun pada perangkat. Formulir transaksi tetap menunjukkan nominal untuk pengisian. Ini fitur tampilan, bukan enkripsi data.
+- Riwayat dapat dicari berdasarkan nama, kategori dan catatan, lalu difilter menurut bulan dan jenis transaksi.
+- Ekspor CSV mengikuti hasil filter, menyertakan nominal asli, dan melindungi kolom teks terhadap formula spreadsheet. File diunduh ke perangkat, tanpa dibagikan ke layanan lain.
+- Ringkasan pengeluaran per kategori hanya menghitung transaksi pengeluaran pada bulan berjalan Asia/Jakarta. Transfer tabungan tidak dihitung sebagai pengeluaran.
+- Perbarui memuat ulang data dari akun, dan notifikasi singkat memberi konfirmasi penyimpanan.
+
+Komponen beranda kini di `src/Dashboard.jsx`; `src/main.jsx` hanya memasang gerbang autentikasi. Komponen baru: `Loading.jsx`, `Onboarding.jsx`, `History.jsx`, `ExpenseSummary.jsx`. Pengujian fitur: `npm run test:features`. Pengujian pembaruan PWA sesudah build: `node tests/pwa-update.mjs`.
+
+Pemeriksaan antarmuka dilakukan memakai data contoh lokal; tidak membuat akun baru atau mengubah data Supabase pengguna.
