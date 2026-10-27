@@ -6,7 +6,8 @@ Kode login, database dompet per akun, dan panel admin sudah disiapkan. Karena pr
 
 1. Buka https://supabase.com/dashboard dan buat proyek SakuPintar. Simpan password database milikmu sendiri; password ini tidak dibutuhkan aplikasi React.
 2. Di SQL Editor, jalankan seluruh isi `supabase/001_auth_wallet.sql` **sekali**. Script membuat tabel profil, dompet, tabungan, transaksi, trigger akun baru, fungsi dompet dan kebijakan RLS. Jangan jalankan pada proyek lain yang sudah mempunyai tabel dengan nama sama.
-3. Pada pengaturan API / Connect, salin **Project URL** dan **publishable key**. Legacy anon key juga bisa dipakai bila proyek masih menggunakannya. Jangan gunakan secret key atau service_role key di frontend.
+3. Jalankan `supabase/002_account_settings.sql` untuk mengaktifkan perubahan nama, pilihan avatar, dan foto profil. Script ini boleh dijalankan ulang; bucket `saku-avatars` wajib privat. Jika proyek sudah menjalankan 001, cukup jalankan 002.
+4. Pada pengaturan API / Connect, salin **Project URL** dan **publishable key**. Legacy anon key juga bisa dipakai bila proyek masih menggunakannya. Jangan gunakan secret key atau service_role key di frontend.
 
 ## 2. Konfigurasi lokal
 
@@ -48,7 +49,17 @@ Panel admin saat ini hanya membaca daftar profil. Pengubahan peran, penghapusan 
 3. Lakukan **Redeploy**. Variabel Vite dibaca ketika build; perubahan variabel tanpa build ulang belum mengubah aplikasi.
 4. Jika pernah memasang PWA versi lama, tutup semua jendela/tab SakuPintar lalu buka kembali agar service worker baru aktif. Jangan menghapus data browser hanya untuk pembaruan.
 
-## Data dan koneksi
+## Pengaturan akun
+
+Ketuk ikon akun di kanan atas untuk membuka **Akun Saya**. Pengguna dapat mengedit nama, memilih avatar atau mengunggah foto, mengubah email, mengganti password, mengulang panduan, dan keluar.
+
+- Foto JPG/PNG/WebP maksimal 8 MB dipotong persegi dan diperkecil menjadi JPEG 512×512 sebelum diunggah (maksimal 2 MB). Foto disimpan privat dalam folder ID pemilik; aplikasi menggunakan tautan sementara yang diperbarui selama sesi aktif. Foto lama dihapus setelah profil baru berhasil disimpan.
+- `update_my_profile` hanya mengubah nama dan avatar akun pemanggil. ID pengguna, email, dan peran tidak dapat diubah lewat fungsi ini. Hak admin tetap dikelola melalui database.
+- Pengubahan email dan password memverifikasi password saat ini melalui sesi sementara terpisah. Password tidak disimpan aplikasi. Email baru perlu dikonfirmasi melalui email sesuai pengaturan Supabase.
+- Jika Supabase meminta verifikasi ulang untuk ganti password, tombol pengiriman kode dan kolom kode muncul. Fitur lupa password mengirim tautan pemulihan. Konfigurasikan Redirect URLs dan pengiriman email seperti bagian 3.
+- Pengujian lokal: `npm run test:account`. Pengujian database menggunakan PostgreSQL lokal dalam memori dengan tiruan tabel Auth/Storage; pengiriman email dan password sungguhan perlu diuji pemilik akun setelah deploy.
+
+## Penyimpanan data
 
 - Pengguna baru mulai dari saldo Rp0 dengan riwayat dan target kosong.
 - Data demo lama di localStorage tidak diimpor otomatis dan tidak dipakai sebagai data akun.

@@ -1,0 +1,50 @@
+import { PGlite } from '@electric-sql/pglite';
+import { readFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const db=new PGlite();
+await db.exec(`create role anon nologin; create role authenticated nologin;
+create schema auth; create schema storage;
+create table auth.users(id uuid primary key,email text,raw_user_meta_data jsonb default '{}');
+create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text,unique(bucket_id,name));
+alter table storage.objects enable row level security;
+create function storage.foldername(text) returns text[] language sql immutable as $$ select (string_to_array($1,'/'))[1:array_length(string_to_array($1,'/'),1)-1] $$;
+grant usage on schema auth,storage,public to anon,authenticated;
+grant select,insert,delete on storage.objects to anon,authenticated;`);
+await db.exec(await readFile(new URL('../supabase/001_auth_wallet.sql',import.meta.url),'utf8'));
+const migration=await readFile(new URL('../supabase/002_account_settings.sql',import.meta.url),'utf8');
+await db.exec(migration);await db.exec(migration);
+const alice='11111111-1111-4111-8111-111111111111',bob='22222222-2222-4222-8222-222222222222';
+const image=`${alice}/33333333-3333-4333-8333-333333333333.jpg`;
+await db.query(`insert into auth.users(id,email,raw_user_meta_data) values($1,'alice@example.test','{"display_name":"Alice","role":"admin"}'),($2,'bob@example.test','{}')`,[alice,bob]);
+async function user(id,fn){await db.exec(`set role authenticated;set request.jwt.claim.sub='${id}';`);try{await fn();}finally{await db.exec('reset role;reset request.jwt.claim.sub;');}}
+async function profile(name,path=null,style='blue'){return (await db.query('select public.update_my_profile($1,$2,$3) as profile',[name,path,style])).rows[0].profile;}
+await user(alice,async()=>{
+  await db.query("insert into storage.objects(bucket_id,name) values('saku-avatars',$1)",[image]);
+  const next=await profile(' Alice Baru ',image,'purple');
+  assert.equal(next.display_name,'Alice Baru');assert.equal(next.avatar_path,image);assert.equal(next.avatar_style,'purple');
+  assert.equal(next.role,'user');assert.equal(next.email,'alice@example.test');
+  await assert.rejects(()=>profile(' '),/Nama harus/);
+  await assert.rejects(()=>profile('a'.repeat(61)),/Nama harus/);
+  await assert.rejects(()=>profile('Alice',null,'invalid'),/avatar tidak valid/);
+  await assert.rejects(()=>profile('Alice',`${bob}/33333333-3333-4333-8333-333333333333.jpg`),/Foto profil tidak valid/);
+  await assert.rejects(()=>profile('Alice',`${alice}/44444444-4444-4444-8444-444444444444.jpg`),/belum terunggah/);
+  await assert.rejects(()=>db.query("update public.profiles set role='admin' where id=$1",[alice]),/permission denied/);
+  await assert.rejects(()=>db.query("insert into storage.objects(bucket_id,name) values('saku-avatars',$1)",[`${bob}/evil.jpg`]),/row-level security/);
+});
+await user(bob,async()=>{
+  assert.equal((await db.query('select * from storage.objects')).rows.length,0);
+  assert.equal((await db.query('delete from storage.objects where name=$1 returning name',[image])).rows.length,0);
+  await profile('Bob Baru',null,'green');
+});
+assert.equal((await db.query('select display_name from profiles where id=$1',[alice])).rows[0].display_name,'Alice Baru');
+assert.equal((await db.query('select count(*)::int as n from storage.objects')).rows[0].n,1);
+await user(alice,async()=>{await profile('Alice Baru');await db.query('delete from storage.objects where name=$1',[image]);});
+await db.exec('set role anon;');
+await assert.rejects(()=>profile('Anon'),/permission denied/);
+await assert.rejects(()=>db.query("insert into storage.objects(bucket_id,name) values('saku-avatars','anon/a.jpg')"),/row-level security/);
+await db.exec('reset role;');
+assert.equal((await db.query("select public from storage.buckets where id='saku-avatars'")).rows[0].public,false);
+console.log('PASS: account migration reruns, profile validation, protected email/role, owner-only avatar read/upload/delete, anonymous denied');
+await db.close();

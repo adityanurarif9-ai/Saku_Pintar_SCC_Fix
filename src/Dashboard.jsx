@@ -10,6 +10,8 @@ import ExpenseSummary from './ExpenseSummary';
 import { readPreferences, savePreference } from './preferences';
 import { jakartaMonth, monthLabel } from './history-utils';
 import ExpenseEntry, { ExpenseDock } from './ExpenseEntry';
+import AccountPanel from './AccountPanel';
+import UserAvatar from './UserAvatar';
 
 const defaultApi = { load: loadWallet, submit: submitWallet };
 const rupiah = value => 'Rp' + new Intl.NumberFormat('id-ID').format(value);
@@ -112,7 +114,7 @@ export default function Dashboard({ account, api = defaultApi }) {
     <header className="header" inert={blocked ? true : undefined}>
       <img className="logo" src="/saku-pintar-logo.png" alt="Logo Saku Pintar" />
       <div className="greeting"><span className="brand">SakuPintar{account.profile.role === 'admin' ? ' • Admin' : ''}</span><h1>Halo, {account.profile.display_name || 'teman'}!</h1><p>Yuk, atur keuanganmu hari ini.</p></div>
-      <button className="profile" aria-label="Informasi akun" onClick={() => open('profile')}><span /></button>
+      <button className="profile account-profile-button" aria-label="Buka akun saya" onClick={() => open('profile')}><UserAvatar src={account.avatarUrl} style={account.profile.avatar_style} size={40}/></button>
     </header>
     <main key={tab} ref={mainRef} className={`page-content${showExpenseDock ? ' with-expense-dock' : ''}`} inert={blocked ? true : undefined}>
       {tab === 'Admin' && account.profile.role === 'admin' ? <AdminPanel /> : walletLoading ? <WalletSkeleton /> : walletFailure ? <section><p className="auth-error" role="alert">{walletFailure}</p><button className="full-button" onClick={() => setReload(value => value + 1)}>Coba Lagi</button></section> : <>
@@ -148,7 +150,7 @@ export default function Dashboard({ account, api = defaultApi }) {
     <nav className={`bottom-nav${account.profile.role === 'admin' ? ' admin-nav' : ''}`} inert={blocked ? true : undefined} aria-label="Navigasi utama">{['Beranda', 'Celengan', 'Riwayat', ...(account.profile.role === 'admin' ? ['Admin'] : [])].map(name => <button key={name} className={tab === name ? 'active' : ''} aria-current={tab === name ? 'page' : undefined} onClick={() => setTab(name)}>{name}</button>)}</nav>
     {showExpenseDock && <ExpenseDock onClick={() => open('expense')} />}
     {notice && !blocked && <p className={`toast-message${showExpenseDock ? ' toast-above-dock' : ''}`} role="status" key={notice.id}>✓ {notice.message}</p>}
-    {modal && <TransactionSheet type={modal} account={account} onReplayTutorial={replayTutorial} saving={saving} closing={closing} balance={data.balance} goals={data.goals} error={error} onClose={closeModal} onSubmit={submit} />}
+    {modal === 'profile' ? <AccountPanel account={account} closing={closing} onClose={closeModal} onReplayTutorial={replayTutorial}/> : modal && <TransactionSheet type={modal} saving={saving} closing={closing} balance={data.balance} goals={data.goals} error={error} onClose={closeModal} onSubmit={submit} />}
     {tutorialVisible && <Onboarding onFinish={finishTutorial} />}
   </div>;
 }

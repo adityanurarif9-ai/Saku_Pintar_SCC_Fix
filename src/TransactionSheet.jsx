@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import InstallApp from './InstallApp';
 import { BusyLabel } from './Loading';
 import { ReceiptIcon } from './ExpenseEntry';
 
@@ -19,20 +18,13 @@ function MoneyInput({ name, placeholder, required = true, autoFocus = false, ton
     }} />;
 }
 
-export default function TransactionSheet({ type, account, onReplayTutorial, saving, closing, balance, goals, error, onClose, onSubmit }) {
-  const [signingOut, setSigningOut] = useState(false);
-  const [logoutError, setLogoutError] = useState('');
+export default function TransactionSheet({ type, saving, closing, balance, goals, error, onClose, onSubmit }) {
   const [expenseName, setExpenseName] = useState('');
   const [expenseCategory, setExpenseCategory] = useState('');
   const expenseAmountRef = useRef(null);
   function chooseExpense(name, category) {
     setExpenseName(name); setExpenseCategory(category);
     expenseAmountRef.current?.focus();
-  }
-  async function logout() {
-    setSigningOut(true); setLogoutError('');
-    try { await account.signOut(); }
-    catch { setLogoutError('Belum dapat keluar. Coba lagi.'); setSigningOut(false); }
   }
   const sheetRef = useRef(null);
   const closeRef = useRef(onClose);
@@ -55,13 +47,13 @@ export default function TransactionSheet({ type, account, onReplayTutorial, savi
     document.addEventListener('keydown', keyboard);
     return () => { document.removeEventListener('keydown', keyboard); previous?.focus(); };
   }, []);
-  const titles = { income: 'Tambah Saldo', expense: 'Catat Pengeluaran', goal: 'Buat Target Baru', transfer: 'Transfer ke Celengan', profile: 'SakuPintar' };
-  const captions = { income: 'PEMASUKAN BARU', expense: 'PENGELUARAN BARU', goal: 'TARGET TABUNGAN BARU', transfer: 'ISI TABUNGAN', profile: 'TENTANG APLIKASI' };
+  const titles = { income: 'Tambah Saldo', expense: 'Catat Pengeluaran', goal: 'Buat Target Baru', transfer: 'Transfer ke Celengan' };
+  const captions = { income: 'PEMASUKAN BARU', expense: 'PENGELUARAN BARU', goal: 'TARGET TABUNGAN BARU', transfer: 'ISI TABUNGAN' };
   const buttons = { income: 'Simpan Pemasukan', expense: 'Simpan Pengeluaran', goal: 'Simpan Target', transfer: 'Simpan Transfer' };
   return <div className={`modal-backdrop${closing ? ' is-closing' : ''}`} onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
     <section ref={sheetRef} className={`modal sheet-${type}`} role="dialog" aria-modal="true" aria-labelledby="modal-title" tabIndex={-1}>
       <header className="sheet-heading">{type === 'expense' && <><span className="expense-sheet-icon"><ReceiptIcon size={24} /></span><button className="expense-sheet-close" type="button" aria-label="Tutup catat pengeluaran" disabled={saving || closing} onClick={onClose}>×</button></>}<p>{captions[type]}</p><h2 id="modal-title">{titles[type]}</h2>{type === 'expense' && <div className="expense-sheet-description">Catat uang yang baru dipakai. Setelah disimpan, saldo akan berkurang sesuai nominalnya.</div>}</header>
-      {type === 'profile' ? <><img className="profile-brand" src="/saku-pintar-logo.png" alt="Saku Pintar" /><h3>{account.profile.display_name || 'Pengguna'}</h3><p className="profile-note">{account.profile.email}</p><span className="role-badge">{account.profile.role === 'admin' ? 'Admin' : 'Pengguna'}</span><p className="profile-note">Data dompet tersimpan di akunmu. Koneksi internet diperlukan untuk memuat dan menyimpan transaksi.</p><button className="replay-tutorial" disabled={signingOut} onClick={onReplayTutorial}>Buka panduan penggunaan</button><InstallApp />{logoutError && <p className="auth-error" role="alert">{logoutError}</p>}<button className="logout-button" disabled={signingOut} onClick={logout}>{signingOut ? <BusyLabel>Keluar…</BusyLabel> : 'Keluar dari Akun'}</button><button className="cancel-button" disabled={signingOut} onClick={onClose}>Tutup</button></> : <form onSubmit={onSubmit} aria-busy={saving}>
+      <form onSubmit={onSubmit} aria-busy={saving}>
         <div className="form-fields">
           {type === 'income' && <>
             <label>Nominal pemasukan (Rp) *<MoneyInput name="amount" placeholder="Rp200.000" autoFocus tone="accent-blue" /></label>
@@ -90,7 +82,7 @@ export default function TransactionSheet({ type, account, onReplayTutorial, savi
           {error && <p className="error" role="alert">{error}</p>}
         </div>
         <div className="form-actions"><button className="cancel-button" type="button" disabled={saving || closing} onClick={onClose}>Batal</button><button className="submit-button" type="submit" disabled={saving || closing || (type === 'transfer' && !goals.length)}>{saving ? <BusyLabel>Menyimpan…</BusyLabel> : buttons[type]}</button></div>
-      </form>}
+      </form>
     </section>
   </div>;
 }
