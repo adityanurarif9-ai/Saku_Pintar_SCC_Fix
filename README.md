@@ -8,3 +8,5 @@ Panduan pengaturan backend dan menu akun: [PANDUAN-SUPABASE.md](PANDUAN-SUPABASE
 Untuk instalasi baru jalankan migrasi 001 lalu 002. Untuk proyek yang sudah aktif cukup tambahkan migrasi 002.
 
 Pemeriksaan: `npm run test:db`, `npm run test:features`, `npm run test:account`.
+
+Halaman **Statistik** tersedia pada navbar bawah. Pilih bulan untuk melihat arus kas, tren 6 bulan, pengeluaran per kategori, serta unduh laporan Excel (.xlsx) berisi 4 lembar. Ekspor dipindahkan dari Riwayat ke Statistik. Transfer tabungan dilaporkan terpisah; selisih arus kas bukan saldo akhir. Pengujian perhitungan dan pembacaan ulang Excel: `npm run test:statistics`.

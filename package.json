@@ -10,10 +10,12 @@
     "test:db": "node tests/auth-wallet.mjs && node tests/account-db.mjs",
     "test:account": "node --test tests/account-utils.mjs && node tests/account-db.mjs",
     "test:history": "node --test tests/history.mjs",
-    "test:features": "node --test tests/history.mjs tests/preferences.mjs"
+    "test:features": "node --test tests/history.mjs tests/preferences.mjs",
+    "test:statistics": "node --test tests/statistics.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
+    "exceljs": "^4.4.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

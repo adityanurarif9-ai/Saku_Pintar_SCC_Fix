@@ -12,10 +12,16 @@ import { jakartaMonth, monthLabel } from './history-utils';
 import ExpenseEntry, { ExpenseDock } from './ExpenseEntry';
 import AccountPanel from './AccountPanel';
 import UserAvatar from './UserAvatar';
+import Statistics from './Statistics';
 
 const defaultApi = { load: loadWallet, submit: submitWallet };
 const rupiah = value => 'Rp' + new Intl.NumberFormat('id-ID').format(value);
 const parseMoney = value => Number(String(value || '').replace(/[^0-9]/g, ''));
+
+function NavIcon({ name }) {
+  const paths = { Beranda: 'm3 10 9-7 9 7v11h-6v-7H9v7H3V10Z', Celengan: 'M4 9h16v11H4V9Zm3-4h10v4H7V5Zm3 8h4M12 3v2', Riwayat: 'M4 4h16v17H4V4Zm4 5h8M8 13h8M8 17h5', Statistik: 'M4 3v18h17M8 16v-4m5 4V7m5 9v-7', Admin: 'm12 2 8 3v6c0 5-8 10-8 10S4 16 4 11V5l8-3Zm-4 9 3 3 5-6' };
+  return <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name]}/></svg>;
+}
 
 function Goal({ goal, money }) {
   const percent = Math.min(100, Math.round(goal.saved / goal.target * 100));
@@ -75,7 +81,7 @@ export default function Dashboard({ account, api = defaultApi }) {
   useEffect(() => { document.title = `${tab} — SakuPintar`; }, [tab]);
   const [modal, setModal] = useState(null);
   const blocked = Boolean(modal || tutorialVisible);
-  const showExpenseDock = !blocked && !walletLoading && !walletFailure && tab !== 'Admin' && !expenseVisible;
+  const showExpenseDock = !blocked && !walletLoading && !walletFailure && !['Admin', 'Statistik'].includes(tab) && !expenseVisible;
   const [error, setError] = useState('');
   const [notice, setNotice] = useState(null);
   const notify = message => setNotice({ message, id: Date.now() });
@@ -118,7 +124,7 @@ export default function Dashboard({ account, api = defaultApi }) {
     </header>
     <main key={tab} ref={mainRef} className={`page-content${showExpenseDock ? ' with-expense-dock' : ''}`} inert={blocked ? true : undefined}>
       {tab === 'Admin' && account.profile.role === 'admin' ? <AdminPanel /> : walletLoading ? <WalletSkeleton /> : walletFailure ? <section><p className="auth-error" role="alert">{walletFailure}</p><button className="full-button" onClick={() => setReload(value => value + 1)}>Coba Lagi</button></section> : <>
-      <div className="wallet-toolbar"><span>{monthLabel(jakartaMonth())}</span><button onClick={() => { setNotice(null); setReload(value => value + 1); }} aria-label="Muat ulang data dompet">↻ Perbarui</button></div>
+      <div className="wallet-toolbar"><span>{tab === 'Statistik' ? 'Laporan transaksi' : monthLabel(jakartaMonth())}</span><button onClick={() => { setNotice(null); setReload(value => value + 1); }} aria-label="Muat ulang data dompet">↻ Perbarui</button></div>
       {tab === 'Beranda' && <>
         <section className="balance-card" aria-label="Ringkasan saldo">
           <div className="balance-top"><h2>Total Saldo</h2><button className="privacy-toggle" aria-label={hidden ? 'Tampilkan nominal' : 'Sembunyikan nominal'} aria-pressed={hidden} onClick={toggleHidden}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" />{hidden && <path d="m3 3 18 18" />}</svg><span>{hidden ? 'Tampilkan' : 'Sembunyikan'}</span></button></div>
@@ -136,7 +142,8 @@ export default function Dashboard({ account, api = defaultApi }) {
         <div className="section-heading"><h2>Aktivitas Terakhir</h2><button onClick={() => setTab('Riwayat')}>Lihat Semua</button></div>
         <ActivityList activities={data.activities.slice(0, 3)} money={money} emptyMessage="Belum ada transaksi. Tambahkan saldo pertamamu." />
       </section>}
-      {tab === 'Riwayat' && <History activities={data.activities} money={money} onNotice={notify} />}
+      {tab === 'Riwayat' && <History activities={data.activities} money={money} />}
+      {tab === 'Statistik' && <Statistics activities={data.activities} money={money} hidden={hidden} onToggleHidden={toggleHidden} onNotice={notify}/>}
       {(tab === 'Beranda' || tab === 'Celengan') && <section className="goals-section">
         <div className="section-heading"><h2>Target Tabunganku</h2><button onClick={() => tab === 'Beranda' ? setTab('Celengan') : open('goal')}>{tab === 'Beranda' ? 'Lihat Celengan' : '+ Tambah Target'}</button></div>
         {(tab === 'Beranda' ? data.goals.slice(0, 1) : data.goals).map(goal => <Goal goal={goal} money={money} key={goal.id} />)}
@@ -147,7 +154,7 @@ export default function Dashboard({ account, api = defaultApi }) {
       {tab === 'Beranda' && <InstallApp compact />}
       </>}
     </main>
-    <nav className={`bottom-nav${account.profile.role === 'admin' ? ' admin-nav' : ''}`} inert={blocked ? true : undefined} aria-label="Navigasi utama">{['Beranda', 'Celengan', 'Riwayat', ...(account.profile.role === 'admin' ? ['Admin'] : [])].map(name => <button key={name} className={tab === name ? 'active' : ''} aria-current={tab === name ? 'page' : undefined} onClick={() => setTab(name)}>{name}</button>)}</nav>
+    <nav className={`bottom-nav${account.profile.role === 'admin' ? ' admin-nav' : ''}`} inert={blocked ? true : undefined} aria-label="Navigasi utama">{['Beranda', 'Celengan', 'Riwayat', 'Statistik', ...(account.profile.role === 'admin' ? ['Admin'] : [])].map(name => <button key={name} className={tab === name ? 'active' : ''} aria-current={tab === name ? 'page' : undefined} onClick={() => setTab(name)}><NavIcon name={name}/><span>{name}</span></button>)}</nav>
     {showExpenseDock && <ExpenseDock onClick={() => open('expense')} />}
     {notice && !blocked && <p className={`toast-message${showExpenseDock ? ' toast-above-dock' : ''}`} role="status" key={notice.id}>✓ {notice.message}</p>}
     {modal === 'profile' ? <AccountPanel account={account} closing={closing} onClose={closeModal} onReplayTutorial={replayTutorial}/> : modal && <TransactionSheet type={modal} saving={saving} closing={closing} balance={data.balance} goals={data.goals} error={error} onClose={closeModal} onSubmit={submit} />}
