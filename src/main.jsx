@@ -4,5 +4,10 @@ import './styles.css';
 import './pwa';
 import AuthGate from './AuthGate';
 import Dashboard from './Dashboard';
+import useRuntimeStatus from './useRuntimeStatus';
 
-createRoot(document.getElementById('root')).render(<AuthGate>{account => <Dashboard key={account.user.id} account={account} />}</AuthGate>);
+function App() {
+  const runtime = useRuntimeStatus();
+  return <AuthGate runtime={runtime}>{account => <Dashboard key={account.user.id} account={account} runtime={runtime}/>}</AuthGate>;
+}
+createRoot(document.getElementById('root')).render(<App/>);

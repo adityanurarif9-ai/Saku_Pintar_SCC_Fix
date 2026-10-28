@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabase';
+import { MaintenanceControl } from './Maintenance';
 
-export default function AdminPanel() {
+export default function AdminPanel({ runtime }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -20,6 +21,7 @@ export default function AdminPanel() {
   }, [attempt]);
   const visible = members.filter(member => `${member.display_name} ${member.email}`.toLowerCase().includes(query.toLowerCase()));
   return <section className="admin-panel"><div className="section-heading"><h2>Panel Admin</h2><span className="role-badge">ADMIN</span></div><p className="admin-intro">Kelola informasi akun pengguna SakuPintar.</p>
+    {runtime && <MaintenanceControl runtime={runtime}/>}
     {loading ? <p role="status">Memuat pengguna…</p> : error ? <><p role="alert" className="auth-error">{error}</p><button className="full-button" onClick={() => setAttempt(value => value + 1)}>Coba Lagi</button></> : <>
       <div className="admin-stats"><article><strong>{members.length}</strong><span>Total akun</span></article><article><strong>{members.filter(member => member.role === 'admin').length}</strong><span>Admin</span></article></div>
       <label className="member-search">Cari pengguna<input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Nama atau email" /></label>

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { supabase, authMessage } from './supabase';
 import { avatarStyles, ownedAvatar, validProfileName } from './account-utils';
+import { authRedirectUrl } from './auth-urls';
 
 export const AVATAR_BUCKET='saku-avatars';
 export function accountMessage(error) {
@@ -51,8 +52,8 @@ export async function changePassword({email,current,password,nonce}) {
 }
 export async function changeEmail({currentEmail,password,email}) {
   await verifyPassword(currentEmail,password);
-  const {error}=await supabase.auth.updateUser({email},{emailRedirectTo:new URL('/',window.location.origin).href});
+  const {error}=await supabase.auth.updateUser({email},{emailRedirectTo:authRedirectUrl()});
   if(error) throw error;
 }
 export async function sendPasswordCode() { const {error}=await supabase.auth.reauthenticate(); if(error) throw error; }
-export async function sendResetEmail(email) { const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:new URL('/',window.location.origin).href}); if(error) throw error; }
+export async function sendResetEmail(email) { const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:authRedirectUrl()}); if(error) throw error; }

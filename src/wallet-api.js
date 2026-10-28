@@ -23,6 +23,6 @@ export async function submitWallet(type, form) {
 }
 export function walletMessage(error) {
   // Only show known validation messages; don't expose server diagnostics.
-  const known = ['Saldo tidak cukup.', 'Nominal tidak valid.', 'Nama wajib diisi.', 'Target tabungan tidak ditemukan.', 'Nominal awal melebihi target.', 'Transfer melebihi sisa target.', 'Kategori tidak valid.'];
+  const known = ['Saldo tidak cukup.', 'Nominal tidak valid.', 'Nama wajib diisi.', 'Target tabungan tidak ditemukan.', 'Nominal awal melebihi target.', 'Transfer melebihi sisa target.', 'Kategori tidak valid.', 'Maintenance sedang berlangsung. Coba lagi setelah pembaruan selesai.'];
   return known.includes(error?.message) ? error.message : 'Data belum berhasil disimpan atau dimuat. Periksa koneksi lalu coba lagi.';
 }

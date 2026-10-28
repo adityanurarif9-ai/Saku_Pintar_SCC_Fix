@@ -1,4 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
+import { confirmationError } from './auth-urls';
+
+// Capture callback failures before the SDK clears authentication URL fragments.
+export const authLinkIssue = typeof window === 'undefined' ? '' : confirmationError(window.location.href);
 
 const url = import.meta.env.VITE_SUPABASE_URL?.trim();
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();

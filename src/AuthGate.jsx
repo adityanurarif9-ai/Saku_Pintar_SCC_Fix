@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import AuthScreen from './AuthScreen';
-import { supabase, authConfigured } from './supabase';
+import { supabase, authConfigured, authLinkIssue } from './supabase';
 import LoadingScreen from './Loading';
 import { avatarUrl as loadAvatarUrl } from './account-api';
+import MaintenanceScreen from './Maintenance';
+import { requiresMaintenance } from './runtime-utils';
 
-export default function AuthGate({ children }) {
+export default function AuthGate({ children, runtime }) {
   const [session, setSession] = useState(null);
   const [checking, setChecking] = useState(authConfigured);
   const [profile, setProfile] = useState(null);
@@ -12,6 +14,7 @@ export default function AuthGate({ children }) {
   const [recovery, setRecovery] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [adminEntry, setAdminEntry] = useState(false);
   useEffect(() => {
     if (!supabase) return;
     let active = true, authEvent = false;
@@ -24,7 +27,7 @@ export default function AuthGate({ children }) {
     });
     supabase.auth.getSession().then(({ data, error }) => {
       if (!active || authEvent) return;
-      if (error) setProblem('Sesi belum bisa diperiksa. Coba muat ulang.');
+      if (error && !authLinkIssue) setProblem('Sesi belum bisa diperiksa. Coba muat ulang.');
       else setSession(data.session);
       setChecking(false);
     }).catch(() => { if (active) { setProblem('Tidak dapat memeriksa sesi. Periksa koneksi internet.'); setChecking(false); } });
@@ -64,7 +67,8 @@ export default function AuthGate({ children }) {
   }
   if (problem && !recovery) return <div className="app-shell auth-shell"><main className="auth-main"><section className="auth-card"><h1>Belum terhubung</h1><p className="auth-error" role="alert">{problem}</p><button className="full-button" onClick={() => { setProblem(''); if (session) setAttempt(value => value + 1); else window.location.reload(); }}>Coba Lagi</button>{session && <button className="cancel-button" onClick={() => signOut().catch(() => setProblem('Keluar belum berhasil. Coba lagi.'))}>Keluar</button>}</section></main></div>;
   if (recovery) return <AuthScreen key="reset" recovery onRecovered={() => setRecovery(false)} />;
-  if (checking || (session && (!profile || profile.id !== session.user.id))) return <LoadingScreen label={checking ? 'Memeriksa sesi akunmu…' : 'Menyiapkan profil dan dompetmu…'} />;
-  if (!session) return <AuthScreen />;
+  if ((runtime && !runtime.checked) || checking || (session && (!profile || profile.id !== session.user.id))) return <LoadingScreen label={checking ? 'Memeriksa sesi akunmu…' : 'Menyiapkan profil dan dompetmu…'} />;
+  if (runtime && requiresMaintenance(runtime.status, profile) && (session || !adminEntry)) return <MaintenanceScreen runtime={runtime} onAdminLogin={!session ? () => setAdminEntry(true) : undefined} onSignOut={session ? signOut : undefined}/>;
+  if (!session) return <AuthScreen adminAccess={runtime?.status.maintenance} onBackToMaintenance={() => setAdminEntry(false)}/>;
   return children({ user: session.user, profile, avatarUrl, applyProfile, signOut });
 }

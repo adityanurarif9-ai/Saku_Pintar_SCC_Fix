@@ -5,7 +5,9 @@ React + Vite, Supabase Auth dan database per akun, serta dukungan instalasi PWA.
 
 Jalankan `npm install`, `npm run dev`, dan `npm run build` untuk produksi.
 Panduan pengaturan backend dan menu akun: [PANDUAN-SUPABASE.md](PANDUAN-SUPABASE.md).
-Untuk instalasi baru jalankan migrasi 001 lalu 002. Untuk proyek yang sudah aktif cukup tambahkan migrasi 002.
+Untuk instalasi baru jalankan migrasi 001, 002, dan 003 berurutan. Untuk proyek yang sudah aktif, jalankan hanya migrasi lanjutan yang belum diterapkan.
+
+Jalankan juga migrasi 003 untuk maintenance terpusat dan perlindungan perubahan dompet selama pembaruan. Pengaturan ada di tab Admin; mulai dalam keadaan nonaktif. Konfirmasi email menggunakan alamat produksi, dengan tombol kirim ulang untuk tautan lama. Konfigurasi dan alur operasional dijelaskan di panduan Supabase. Pemeriksaan: `npm run test:maintenance`.
 
 Pemeriksaan: `npm run test:db`, `npm run test:features`, `npm run test:account`.
 

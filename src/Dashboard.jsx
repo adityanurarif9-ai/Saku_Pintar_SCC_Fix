@@ -35,7 +35,7 @@ function Goal({ goal, money }) {
   </article>;
 }
 
-export default function Dashboard({ account, api = defaultApi }) {
+export default function Dashboard({ account, api = defaultApi, runtime }) {
   const [data, setData] = useState(emptyWallet);
   const [walletLoading, setWalletLoading] = useState(true);
   const [walletFailure, setWalletFailure] = useState('');
@@ -113,7 +113,7 @@ export default function Dashboard({ account, api = defaultApi }) {
       submitLock.current = false;
       closeModal();
       notify(modal === 'expense' ? 'Pengeluaran berhasil dicatat.' : 'Berhasil disimpan ke akunmu.');
-    } catch (error) { setError(walletMessage(error)); }
+    } catch (error) { setError(walletMessage(error)); if (error?.message === 'Maintenance sedang berlangsung. Coba lagi setelah pembaruan selesai.') runtime?.refresh(); }
     finally { submitLock.current = false; setSaving(false); }
   }
   return <div className="app-shell">
@@ -122,8 +122,9 @@ export default function Dashboard({ account, api = defaultApi }) {
       <div className="greeting"><span className="brand">SakuPintar{account.profile.role === 'admin' ? ' • Admin' : ''}</span><h1>Halo, {account.profile.display_name || 'teman'}!</h1><p>Yuk, atur keuanganmu hari ini.</p></div>
       <button className="profile account-profile-button" aria-label="Buka akun saya" onClick={() => open('profile')}><UserAvatar src={account.avatarUrl} style={account.profile.avatar_style} size={40}/></button>
     </header>
+    {runtime?.status.maintenance && account.profile.role === 'admin' && <div className="maintenance-admin-banner" inert={blocked ? true : undefined}><span><strong>Maintenance aktif</strong> • Kamu masuk sebagai admin.</span><button onClick={() => setTab('Admin')}>Kelola</button></div>}
     <main key={tab} ref={mainRef} className={`page-content${showExpenseDock ? ' with-expense-dock' : ''}`} inert={blocked ? true : undefined}>
-      {tab === 'Admin' && account.profile.role === 'admin' ? <AdminPanel /> : walletLoading ? <WalletSkeleton /> : walletFailure ? <section><p className="auth-error" role="alert">{walletFailure}</p><button className="full-button" onClick={() => setReload(value => value + 1)}>Coba Lagi</button></section> : <>
+      {tab === 'Admin' && account.profile.role === 'admin' ? <AdminPanel runtime={runtime}/> : walletLoading ? <WalletSkeleton /> : walletFailure ? <section><p className="auth-error" role="alert">{walletFailure}</p><button className="full-button" onClick={() => setReload(value => value + 1)}>Coba Lagi</button></section> : <>
       <div className="wallet-toolbar"><span>{tab === 'Statistik' ? 'Laporan transaksi' : monthLabel(jakartaMonth())}</span><button onClick={() => { setNotice(null); setReload(value => value + 1); }} aria-label="Muat ulang data dompet">↻ Perbarui</button></div>
       {tab === 'Beranda' && <>
         <section className="balance-card" aria-label="Ringkasan saldo">
