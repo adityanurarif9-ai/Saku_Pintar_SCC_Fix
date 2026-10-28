@@ -30,6 +30,18 @@ Jalankan `npm install` lalu `npm run dev`. Jika server sudah berjalan saat `.env
 
 Tautan email yang sudah terbit sebelumnya mungkin masih mengarah ke localhost. Jika akun sudah terverifikasi, buka alamat produksi dan masuk langsung. Jika belum, isi email di halaman Masuk/Daftar lalu pilih **Kirim ulang email verifikasi**. Gunakan email terbaru; tombol kirim ulang memiliki jeda 60 detik. Pesan tautan kedaluwarsa ditampilkan dengan petunjuk pemulihan tanpa menampilkan isi error mentah dari URL.
 
+## Jika pendaftaran gagal: batas pengiriman email
+
+`over_email_send_rate_limit` berarti pengiriman email proyek mencapai batas; ini berbeda dengan `over_request_rate_limit` (permintaan terlalu sering) dan `email_address_not_authorized` (pengirim bawaan tidak mengizinkan penerima). Pesan ini dapat terjadi di iPhone maupun Android. SMTP bawaan Supabase ditujukan untuk pengujian, dibatasi 2 email/jam per proyek menurut dokumentasi saat pemeriksaan, dan membatasi penerima ke anggota tim. Menekan Buat Akun atau Kirim Ulang berulang kali tidak menyelesaikan batas tersebut. Akun yang sudah terverifikasi dapat mencoba Masuk.
+
+Aplikasi memberi jeda bersama 60 detik untuk pendaftaran, pemulihan password, dan kirim ulang sesudah pengiriman berhasil atau dibatasi. Jeda bertahan ketika halaman dimuat ulang dalam tab yang sama. Jeda ini bukan jaminan bahwa kuota server sudah pulih; kuota proyek dapat membutuhkan waktu lebih lama.
+
+Untuk menerima pengguna umum, siapkan pengirim SMTP sendiri. Di Authentication → Emails → SMTP Settings, isi alamat pengirim terverifikasi, nama pengirim SakuPintar, host, port, login SMTP, dan SMTP key dari penyedia. Pemilik akun memasukkan key langsung di dashboard; jangan menyimpan key SMTP dalam VITE_*, GitHub, atau chat. Jangan mematikan konfirmasi email untuk mengatasi batas kirim.
+
+Salah satu pilihan yang didukung Supabase adalah Brevo. Buat akun melalui situs resminya, verifikasi alamat pengirim, dan pastikan layanan transactional sudah disetujui. Gunakan host `smtp-relay.brevo.com`, port 587, nilai Login pada Settings → SMTP & API, serta SMTP key sebagai password (bukan password akun atau API key). Jika belum punya domain sendiri, ikuti kebijakan pengirim sementara Brevo; alamat Gmail tidak bisa diautentikasi sebagai domain milik sendiri dan Brevo dapat mengganti domain pengirim sementara. Pengiriman tetap tunduk pada persetujuan dan batas penyedia. Setelah aktif, lakukan satu pengujian pendaftaran yang disetujui pemilik, lalu verifikasi email dan login dari iPhone/Android.
+
+Referensi: [Supabase SMTP](https://supabase.com/docs/guides/auth/auth-smtp), [batas Supabase Auth](https://supabase.com/docs/guides/auth/rate-limits), [pengaturan Brevo SMTP](https://help.brevo.com/hc/en-us/articles/115000188150-Troubleshooting-Issues-with-Brevo-SMTP).
+
 ## 4. Jadikan akunmu admin
 
 Daftar akun biasa dengan emailmu dan selesaikan konfirmasi terlebih dahulu. Di SQL Editor milik pengelola, ganti email contoh di bawah dengan email akun tersebut:

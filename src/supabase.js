@@ -15,13 +15,4 @@ try {
 export const supabase = client;
 export const authConfigured = Boolean(client);
 
-export function authMessage(error) {
-  const code = error?.code;
-  if (code === 'invalid_credentials') return 'Email atau password belum cocok. Coba periksa lagi.';
-  if (code === 'email_not_confirmed') return 'Konfirmasi email melalui tautan yang dikirim sebelum masuk.';
-  if (code === 'user_already_exists') return 'Email ini sudah terdaftar. Silakan masuk.';
-  if (code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit') return 'Terlalu banyak percobaan. Tunggu sebentar sebelum mencoba lagi.';
-  if (code === 'weak_password') return 'Password belum memenuhi ketentuan. Gunakan minimal 8 karakter yang sulit ditebak.';
-  if (code === 'same_password') return 'Gunakan password baru yang berbeda dari sebelumnya.';
-  return 'Permintaan belum berhasil. Periksa koneksi dan coba lagi. Jika berlanjut, hubungi pengelola aplikasi.';
-}
+export { authMessage } from './auth-errors';

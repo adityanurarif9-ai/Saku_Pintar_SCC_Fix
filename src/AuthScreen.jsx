@@ -3,6 +3,7 @@ import { supabase, authMessage, authLinkIssue } from './supabase';
 import InstallApp from './InstallApp';
 import { BusyLabel } from './Loading';
 import { authRedirectUrl } from './auth-urls';
+import { rateLimited, readEmailPause, startEmailPause } from './auth-errors';
 
 export default function AuthScreen({ recovery = false, onRecovered, adminAccess = false, onBackToMaintenance, client = supabase }) {
   const [mode, setMode] = useState(recovery ? 'reset' : 'login');
@@ -12,8 +13,11 @@ export default function AuthScreen({ recovery = false, onRecovered, adminAccess 
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
   const [resending, setResending] = useState(false);
-  const [resendUntil, setResendUntil] = useState(0);
-  const [remaining, setRemaining] = useState(0);
+  const [resendUntil, setResendUntil] = useState(readEmailPause);
+  const [remaining, setRemaining] = useState(() => Math.max(0, Math.ceil((readEmailPause() - Date.now()) / 1000)));
+  const emailAction = mode === 'signup' || mode === 'forgot';
+  function pauseEmail() { setResendUntil(startEmailPause()); setRemaining(60); }
+  function showAuthError(problem) { setError(authMessage(problem)); if (rateLimited(problem)) pauseEmail(); }
   useEffect(() => {
     if (!resendUntil) return;
     const tick = () => setRemaining(Math.max(0, Math.ceil((resendUntil - Date.now()) / 1000)));
@@ -25,9 +29,9 @@ export default function AuthScreen({ recovery = false, onRecovered, adminAccess 
     setResending(true); setError(''); setMessage('');
     try {
       const { error } = await client.auth.resend({ type: 'signup', email: email.trim(), options: { emailRedirectTo: authRedirectUrl() } });
-      if (error) { setError(authMessage(error)); return; }
+      if (error) { showAuthError(error); return; }
       setMessage('Jika akun masih perlu diverifikasi, email baru akan dikirim. Gunakan tautan terbaru dan periksa folder spam.');
-      setResendUntil(Date.now() + 60000); setRemaining(60);
+      pauseEmail();
     } catch { setError('Email belum berhasil dikirim. Periksa koneksi dan coba lagi.'); }
     finally { setResending(false); }
   }
@@ -40,7 +44,7 @@ export default function AuthScreen({ recovery = false, onRecovered, adminAccess 
   function change(next) { setMode(next); setError(''); setMessage(''); setVisible(false); }
   async function submit(event) {
     event.preventDefault();
-    if (busy || resending || !client) return;
+    if (busy || resending || !client || (emailAction && remaining > 0)) return;
     const form = new FormData(event.currentTarget);
     const email = String(form.get('email') || '').trim();
     const password = String(form.get('password') || '');
@@ -53,17 +57,17 @@ export default function AuthScreen({ recovery = false, onRecovered, adminAccess 
       if (mode === 'login') result = await client.auth.signInWithPassword({ email, password });
       if (mode === 'signup') {
         result = await client.auth.signUp({ email, password, options: { emailRedirectTo: redirect, data: { display_name: String(form.get('name')).trim() } } });
-        if (!result.error && !result.data.session) setMessage('Periksa emailmu untuk konfirmasi akun, lalu kembali ke halaman Masuk.');
+        if (!result.error && !result.data.session) { setMessage('Periksa emailmu untuk konfirmasi akun, lalu kembali ke halaman Masuk. Tidak perlu menekan Buat Akun lagi.'); pauseEmail(); }
       }
       if (mode === 'forgot') {
         result = await client.auth.resetPasswordForEmail(email, { redirectTo: redirect });
-        if (!result.error) setMessage('Jika email terdaftar, tautan pemulihan akan dikirim. Periksa kotak masuk dan spam.');
+        if (!result.error) { setMessage('Jika email terdaftar, tautan pemulihan akan dikirim. Periksa kotak masuk dan spam.'); pauseEmail(); }
       }
       if (mode === 'reset') {
         result = await client.auth.updateUser({ password });
         if (!result.error) { setMessage('Password berhasil diubah.'); onRecovered(); }
       }
-      if (result.error) setError(authMessage(result.error));
+      if (result.error) showAuthError(result.error);
     } catch { setError('Tidak dapat terhubung. Periksa koneksi internetmu.'); }
     finally { setBusy(false); }
   }
@@ -84,7 +88,9 @@ export default function AuthScreen({ recovery = false, onRecovered, adminAccess 
         {mode === 'login' && <button className="forgot-link" type="button" disabled={busy} onClick={() => change('forgot')}>Lupa password?</button>}
         {error && <p role="alert" className="auth-error">{error}</p>}
         {message && <p role="status" className="auth-message">{message}</p>}
-        <button className="full-button auth-submit" type="submit" disabled={busy || resending || !client}>{busy ? <BusyLabel>Memproses…</BusyLabel> : mode === 'login' ? 'Masuk ke SakuPintar' : mode === 'signup' ? 'Buat Akun' : mode === 'forgot' ? 'Kirim Tautan Pemulihan' : 'Simpan Password Baru'}</button>
+        <button className="full-button auth-submit" type="submit" disabled={busy || resending || !client || (emailAction && remaining > 0)}>{busy ? <BusyLabel>Memproses…</BusyLabel> : emailAction && remaining > 0 ? `Pengiriman dijeda ${remaining} detik` : mode === 'login' ? 'Masuk ke SakuPintar' : mode === 'signup' ? 'Buat Akun' : mode === 'forgot' ? 'Kirim Tautan Pemulihan' : 'Simpan Password Baru'}</button>
+        {emailAction && remaining > 0 && <p className="auth-footnote">Jeda ini mencegah pengiriman berulang. Batas layanan email dapat berlangsung lebih lama.</p>}
+        {mode === 'signup' && (message || error) && <button className="forgot-link" type="button" disabled={busy || resending} onClick={() => change('login')}>Sudah punya akun? Masuk di sini</button>}
         {['login', 'signup'].includes(mode) && <div className="resend-confirmation"><p>Belum menerima email atau tautan verifikasi bermasalah?</p><button type="button" disabled={busy || resending || remaining > 0 || !client} onClick={resendConfirmation}>{resending ? 'Mengirim email…' : remaining ? `Kirim ulang dalam ${remaining} detik` : 'Kirim ulang email verifikasi'}</button></div>}
         {mode === 'forgot' && <button type="button" className="cancel-button" disabled={busy} onClick={() => change('login')}>Kembali ke Masuk</button>}
       </form>

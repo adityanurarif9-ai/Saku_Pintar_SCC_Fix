@@ -12,7 +12,8 @@
     "test:history": "node --test tests/history.mjs",
     "test:features": "node --test tests/history.mjs tests/preferences.mjs",
     "test:statistics": "node --test tests/statistics.mjs",
-    "test:maintenance": "node --test tests/auth-redirect.mjs && node tests/maintenance-db.mjs"
+    "test:maintenance": "node --test tests/auth-redirect.mjs && node tests/maintenance-db.mjs",
+    "test:auth": "node --test tests/auth-limits.mjs tests/auth-redirect.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
