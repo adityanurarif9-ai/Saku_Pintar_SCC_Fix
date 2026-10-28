@@ -57,4 +57,3 @@ export default function Statistics({ activities, money, hidden, onToggleHidden, 
     <section className="stats-export"><span className="excel-file-icon" aria-hidden="true">X</span><div><h3>Simpan laporanmu</h3><p>File Excel berisi ringkasan, transaksi, kategori, dan tren 6 bulan.</p></div><button disabled={exporting || !report.count} onClick={exportExcel}>{exporting ? <BusyLabel>Menyiapkan Excel…</BusyLabel> : 'Unduh Excel (.xlsx)'}</button><small>Transaksi mengikuti periode pilihan. File memuat nominal lengkap, termasuk saat tampilan disembunyikan.</small></section>
   </section>;
 }
-
