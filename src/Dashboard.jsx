@@ -13,6 +13,7 @@ import ExpenseEntry, { ExpenseDock } from './ExpenseEntry';
 import AccountPanel from './AccountPanel';
 import UserAvatar from './UserAvatar';
 import Statistics from './Statistics';
+import BudgetCard from './BudgetCard';
 
 const defaultApi = { load: loadWallet, submit: submitWallet };
 const rupiah = value => 'Rp' + new Intl.NumberFormat('id-ID').format(value);
@@ -24,10 +25,11 @@ function NavIcon({ name }) {
 }
 
 function Goal({ goal, money }) {
-  const percent = Math.min(100, Math.round(goal.saved / goal.target * 100));
+  const percent = goal.target > 0 ? Math.min(100, Math.round(goal.saved / goal.target * 100)) : 0;
   return <article className="goal-card">
     <h3>{goal.name} — Target {money(goal.target)}</h3>
     <p>Terkumpul {money(goal.saved)} ({percent}%)</p>
+    <p className="goal-remaining">{goal.saved >= goal.target ? '✓ Target tercapai. Hebat, pertahankan kebiasaanmu!' : `Tinggal ${money(goal.target - goal.saved)} menuju target`}</p>
     {goal.notes && <p className="goal-notes">{goal.notes}</p>}
     <div className="progress" role="progressbar" aria-label={`Tabungan ${goal.name}`} aria-valuenow={percent} aria-valuemin="0" aria-valuemax="100">
       <span className={percent > 0 ? 'has-progress' : ''} style={{ width: `${percent}%` }} />
@@ -133,6 +135,7 @@ export default function Dashboard({ account, api = defaultApi, runtime }) {
           <div className="balance-actions"><button className="button-yellow" onClick={() => open('income')}>+ Tambah Saldo</button><button className="button-outline" onClick={() => open('transfer')}>Transfer ke Celengan</button></div>
         </section>
         <ExpenseEntry buttonRef={expenseRef} onClick={() => open('expense')} />
+        <BudgetCard userId={account.user.id} activities={data.activities} money={money}/>
         <section className="summary" aria-label="Pemasukan dan pengeluaran">
           <article><span className="stat-icon incoming">↓</span><div><h2>Pemasukan</h2><strong className="green">{money(data.income)}</strong><p>Bulan ini</p></div></article>
           <article><span className="stat-icon outgoing">↑</span><div><h2>Pengeluaran</h2><strong className="red">{money(data.expense)}</strong><p>Bulan ini</p></div></article>
