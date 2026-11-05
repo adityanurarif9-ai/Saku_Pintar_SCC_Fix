@@ -32,3 +32,11 @@ Formulir pengeluaran dan transfer sekarang menyediakan tanggal serta catatan. Su
 ## Desain email verifikasi
 
 Template dan cara pemasangan tersedia di [PANDUAN-EMAIL-VERIFIKASI.md](PANDUAN-EMAIL-VERIFIKASI.md). File `supabase/templates/confirm-signup.html` harus disalin ke template **Confirm sign up** di dashboard Supabase; commit atau deploy frontend tidak memasangnya otomatis.
+
+## Indikator kebiasaan belanja dan motivasi
+
+Beranda menampilkan kartu Teman Atur Uangmu di bawah anggaran. Hasil berubah setelah transaksi atau batas anggaran diperbarui. Aturan sederhana terlihat di bagian Bagaimana penilaiannya: anggaran minimal 80% terpakai berarti Perlu dijaga; di atas batas berarti Melewati anggaran. Jika belum mendekati batas, pengeluaran maksimal 70% pemasukan bulan ini berarti Cenderung hemat. Pengeluaran melebihi pemasukan meminta evaluasi dengan catatan bahwa saldo bulan lalu mungkin digunakan. Tanpa pemasukan atau anggaran pembanding, hasil tetap Belum cukup data. Pemasukan saja tidak langsung dinilai hemat. Transfer tabungan bukan pengeluaran belanja.
+
+Indikator hanya memakai transaksi bulan berjalan menurut Asia/Jakarta dan bukan penilaian pribadi, standar keuangan universal, atau kepastian bahwa semua pengeluaran sudah dicatat. Pengguna tetap dapat membaca alasan dan menyesuaikan anggaran untuk kebutuhan penting. Nominal mengikuti pengaturan sembunyikan saldo. Batas anggaran masih merupakan preferensi akun pada perangkat ini.
+
+Tersedia 38 pesan semangat sesuai kondisi. Pilihan awal stabil untuk akun dan kumpulan transaksi yang sama; tombol Pesan semangat lain menggilir pesan tanpa pengulangan berurutan. Tidak membutuhkan layanan AI, biaya API baru, atau migrasi database. Pemeriksaan: `node --test tests/spending-coach.mjs tests/budget.mjs`.

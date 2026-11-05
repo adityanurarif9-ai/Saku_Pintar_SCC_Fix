@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { budgetSummary } from './budget-utils';
 import { readPreferences, savePreference } from './preferences';
+import SpendingCoach from './SpendingCoach';
 
 export default function BudgetCard({ userId, activities, money }) {
   const [limit, setLimit] = useState(() => readPreferences(userId).monthlyBudget || 0);
@@ -15,7 +16,7 @@ export default function BudgetCard({ userId, activities, money }) {
     if (!savePreference(userId, 'monthlyBudget', amount)) return setError('Pengaturan belum tersimpan. Izinkan penyimpanan browser lalu coba lagi.');
     setLimit(amount); setEditing(false); setError('');
   }
-  return <section className={`budget-card${report.valid && report.percent >= 80 ? ' budget-warning' : ''}`} aria-label="Anggaran bulanan">
+  return <><section className={`budget-card${report.valid && report.percent >= 80 ? ' budget-warning' : ''}`} aria-label="Anggaran bulanan">
     <div className="section-heading"><div><span className="budget-kicker">RENCANA BULAN INI</span><h2>Jaga pengeluaranmu</h2></div><button aria-expanded={editing} onClick={() => { setEditing(!editing); setDraft(String(limit || '')); setError(''); }}>{editing ? 'Batal' : report.valid ? 'Atur' : '+ Atur batas'}</button></div>
     {editing ? <form className="budget-form" onSubmit={save}><label htmlFor="monthly-budget">Batas pengeluaran bulanan (Rp)</label><div><input id="monthly-budget" type="number" inputMode="numeric" min="1000" step="1" required value={draft} placeholder="Contoh: 1000000" onChange={event => setDraft(event.target.value)}/><button type="submit">Simpan</button></div>{error && <p role="alert">{error}</p>}</form> : report.valid ? <>
       <div className="budget-amount"><strong>{money(report.spent)}</strong><span>dari {money(limit)}</span></div>
@@ -24,5 +25,5 @@ export default function BudgetCard({ userId, activities, money }) {
       <div className="budget-daily"><span>Alokasi rata-rata tersisa<strong>{money(report.daily)} / hari</strong></span><span>{report.daysLeft} hari<br/>termasuk hari ini</span></div>
     </> : <p className="budget-intro">Tentukan batas bulanan agar kamu tahu kapan harus mengurangi belanja. Transfer celengan tidak dihitung sebagai pengeluaran.</p>}
     <p className="budget-local">Batas berlaku setiap bulan, tersimpan untuk akunmu di perangkat ini. Alokasi harian bukan saldo dompet.</p>
-  </section>;
+  </section><SpendingCoach activities={activities} limit={limit} userId={userId} money={money}/></>;
 }
