@@ -147,7 +147,7 @@ export default function Dashboard({ account, api = defaultApi, runtime }) {
         <ActivityList activities={data.activities.slice(0, 3)} money={money} emptyMessage="Belum ada transaksi. Tambahkan saldo pertamamu." />
       </section>}
       {tab === 'Riwayat' && <History activities={data.activities} money={money} />}
-      {tab === 'Statistik' && <Statistics activities={data.activities} money={money} hidden={hidden} onToggleHidden={toggleHidden} onNotice={notify}/>}
+      {tab === 'Statistik' && <Statistics studentName={account.profile.display_name} currentBalance={data.balance} activities={data.activities} money={money} hidden={hidden} onToggleHidden={toggleHidden} onNotice={notify}/>}
       {(tab === 'Beranda' || tab === 'Celengan') && <section className="goals-section">
         <div className="section-heading"><h2>Target Tabunganku</h2><button onClick={() => tab === 'Beranda' ? setTab('Celengan') : open('goal')}>{tab === 'Beranda' ? 'Lihat Celengan' : '+ Tambah Target'}</button></div>
         {(tab === 'Beranda' ? data.goals.slice(0, 1) : data.goals).map(goal => <Goal goal={goal} money={money} key={goal.id} />)}
@@ -165,5 +165,3 @@ export default function Dashboard({ account, api = defaultApi, runtime }) {
     {tutorialVisible && <Onboarding onFinish={finishTutorial} />}
   </div>;
 }
-
-

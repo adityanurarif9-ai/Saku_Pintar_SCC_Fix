@@ -102,9 +102,9 @@ Pemeriksaan: `npm run test:maintenance` menguji redirect produksi, tautan kedalu
 
 ## Penyimpanan data
 
-Halaman Statistik menggunakan transaksi akun yang sudah dimuat dari `wallet_snapshot`; tidak perlu migrasi database tambahan. Filter bulan memengaruhi ringkasan, kategori, dan transaksi dalam Excel. Grafik dan lembar tren mencakup 6 bulan sampai bulan pilihan. Transfer ke tabungan tidak dihitung sebagai pengeluaran. Rata-rata harian membagi total pengeluaran dengan jumlah hari kalender dalam bulan pilihan. Untuk bulan berjalan, perbandingan tetap memakai total bulan sebelumnya dan ditandai bahwa bulan sekarang belum selesai.
+Halaman Statistik menggunakan transaksi akun yang sudah dimuat dari `wallet_snapshot`; tidak perlu migrasi database tambahan. Filter bulan mengatur statistik layar dan menjadi periode awal ekspor; rentang tanggal ekspor dapat disesuaikan terpisah. Grafik dan lembar tren mencakup 6 bulan sampai bulan pilihan. Transfer ke tabungan tidak dihitung sebagai pengeluaran. Rata-rata harian membagi total pengeluaran dengan jumlah hari kalender dalam bulan pilihan. Untuk bulan berjalan, perbandingan tetap memakai total bulan sebelumnya dan ditandai bahwa bulan sekarang belum selesai.
 
-Ekspor tersedia di Statistik melalui **Unduh Excel (.xlsx)**, bukan lagi di Riwayat. File dibuat di perangkat menggunakan ExcelJS dan berisi lembar Ringkasan, Transaksi, Kategori, dan Tren 6 Bulan. Nominal dalam file selalu lengkap; tombol dinonaktifkan jika periode tidak memiliki transaksi. Pembuat Excel dimuat saat tombol pertama kali digunakan. Ekspor tidak mengirim data ke layanan konversi pihak ketiga.
+Ekspor tersedia di Statistik melalui **Unduh Excel (.xlsx)**, bukan lagi di Riwayat. File dibuat di perangkat menggunakan ExcelJS dan berisi lembar Ringkasan, Transaksi, Rekap Harian, Kategori, dan Tren 6 Bulan. Rentang tanggal di panel ekspor menentukan transaksi, rekap harian, dan kategori; tren tetap memakai bulan penuh sampai bulan tanggal akhir. Nominal dalam file selalu lengkap; tombol dinonaktifkan jika periode tidak memiliki transaksi. Pembuat Excel dimuat saat tombol pertama kali digunakan. Ekspor tidak mengirim data ke layanan konversi pihak ketiga.
 
 - Pengguna baru mulai dari saldo Rp0 dengan riwayat dan target kosong.
 - Data demo lama di localStorage tidak diimpor otomatis dan tidak dipakai sebagai data akun.

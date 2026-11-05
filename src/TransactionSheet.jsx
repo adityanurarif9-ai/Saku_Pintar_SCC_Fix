@@ -57,7 +57,7 @@ export default function TransactionSheet({ type, saving, closing, balance, goals
         <div className="form-fields">
           {type === 'income' && <>
             <label>Nominal pemasukan (Rp) *<MoneyInput name="amount" placeholder="Rp200.000" autoFocus tone="accent-blue" /></label>
-            <label>Sumber pemasukan *<select name="name" required defaultValue=""><option value="" disabled>Uang Saku (Gaji / Hadiah / Lainnya)</option><option>Uang Saku</option><option>Gaji</option><option>Hadiah</option><option>Lainnya</option></select></label>
+            <label>Sumber pemasukan *<input name="name" list="income-sources" maxLength={60} required placeholder="Contoh: Uang saku dari orang tua"/><datalist id="income-sources"><option value="Uang Saku"/><option value="Gaji"/><option value="Hadiah"/><option value="Hasil jualan"/></datalist></label>
             <label>Tanggal<input type="date" name="date" defaultValue={today()} required /></label>
             <label>Catatan (opsional)<textarea name="notes" placeholder="Uang saku mingguan" maxLength={300} /></label>
           </>}
@@ -66,6 +66,8 @@ export default function TransactionSheet({ type, saving, closing, balance, goals
             <label>Untuk apa pengeluarannya? *<input disabled={saving || closing} name="name" placeholder="Contoh: Beli makan siang" maxLength={60} required autoFocus value={expenseName} onChange={event => setExpenseName(event.target.value)} /></label>
             <label>Berapa uang yang dipakai? (Rp) *<MoneyInput disabled={saving || closing} inputRef={expenseAmountRef} name="amount" placeholder="Rp15.000" tone="accent-red" /></label>
             <label>Kategori pengeluaran *<select disabled={saving || closing} name="category" value={expenseCategory} onChange={event => setExpenseCategory(event.target.value)} required><option value="" disabled>Pilih kategori pengeluaran</option>{['Makanan', 'Transportasi', 'Pendidikan', 'Hiburan', 'Belanja', 'Lainnya'].map(category => <option key={category}>{category}</option>)}</select></label>
+            <label>Tanggal pengeluaran *<input disabled={saving || closing} type="date" name="date" defaultValue={today()} required/></label>
+            <label>Catatan / rincian (opsional)<textarea disabled={saving || closing} name="notes" maxLength={300} placeholder="Contoh: Nasi ayam dan es teh di kantin sekolah"/></label>
             <div className="expense-balance-note"><span>Saldo tersedia <strong>{rupiah(balance)}</strong></span><p>Nominal pengeluaran tidak boleh melebihi saldo.</p></div>
           </>}
           {type === 'goal' && <>
@@ -77,6 +79,8 @@ export default function TransactionSheet({ type, saving, closing, balance, goals
           {type === 'transfer' && <>
             <label>Target tabungan *<select name="goal" required>{goals.map(goal => <option value={goal.id} key={goal.id}>{goal.name}</option>)}</select></label>
             <label>Nominal (Rp) *<MoneyInput name="amount" placeholder="Rp50.000" autoFocus tone="accent-blue" /></label>
+            <label>Tanggal transfer *<input type="date" name="date" defaultValue={today()} required/></label>
+            <label>Catatan (opsional)<textarea name="notes" maxLength={300} placeholder="Contoh: Menyisihkan sisa uang saku minggu ini"/></label>
             <p className="form-hint">Saldo tersedia {rupiah(balance)}. Transfer memindahkan saldo ke target tabungan.</p>
           </>}
           {error && <p className="error" role="alert">{error}</p>}

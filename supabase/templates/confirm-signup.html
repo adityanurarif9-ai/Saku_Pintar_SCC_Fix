@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verifikasi email SakuPintar</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f3f6fc;color:#16233b;font-family:Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;">
+  <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">Satu langkah lagi. Verifikasi emailmu untuk mulai mencatat uang saku dan menabung di SakuPintar.</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f6fc;">
+    <tr><td align="center" style="padding:28px 12px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+        <tr><td style="padding:0 8px 20px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td style="padding-right:12px;"><img src="https://saku-pintar-scc-fix.vercel.app/saku-pintar-logo.png" width="60" height="60" alt="Logo SakuPintar" style="display:block;border:0;border-radius:14px;"></td>
+            <td><p style="margin:0;font-size:22px;font-weight:bold;color:#245ce5;">SakuPintar</p><p style="margin:5px 0 0;font-size:12px;line-height:18px;color:#687b99;">Catat uangmu. Rencanakan tabunganmu.</p></td>
+          </tr></table>
+        </td></tr>
+        <tr><td style="background-color:#ffffff;border:1px solid #dfe7f4;border-radius:22px;overflow:hidden;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="height:6px;line-height:6px;font-size:0;background-color:#2863ff;border-radius:22px 22px 0 0;">&nbsp;</td></tr>
+            <tr><td style="padding:30px 24px 26px;">
+              <p style="margin:0 0 12px;font-size:11px;font-weight:bold;letter-spacing:1.5px;color:#2863ff;">SATU LANGKAH LAGI</p>
+              <h1 style="margin:0 0 18px;font-size:28px;line-height:36px;letter-spacing:-0.6px;color:#16233b;">Yuk, verifikasi<br>emailmu dulu.</h1>
+              <p style="margin:0 0 12px;font-size:15px;line-height:24px;color:#4c607d;">Halo, teman!</p>
+              <p style="margin:0 0 24px;font-size:15px;line-height:24px;color:#4c607d;">Terima kasih sudah mendaftar di <strong style="color:#16233b;">SakuPintar</strong>. Konfirmasikan alamat emailmu agar akunmu siap digunakan.</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="#2863ff" style="border-radius:12px;">
+                <a href="{{ .ConfirmationURL }}" style="display:block;padding:17px 16px;border:1px solid #2863ff;border-radius:12px;font-size:16px;line-height:22px;font-weight:bold;text-align:center;color:#ffffff;text-decoration:none;">Verifikasi Email Saya</a>
+              </td></tr></table>
+              <p style="margin:16px 0 24px;font-size:12px;line-height:20px;color:#7183a0;">Tautan ini berlaku sementara dan hanya dapat dipakai sekali. Jika kedaluwarsa, buka SakuPintar lalu pilih <strong>Kirim ulang email verifikasi</strong>.</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:17px 16px;background-color:#fff8df;border:1px solid #f5e7ac;border-radius:12px;">
+                <p style="margin:0 0 6px;font-size:13px;line-height:20px;font-weight:bold;color:#705413;">Setelah akunmu aktif</p>
+                <p style="margin:0;font-size:13px;line-height:22px;color:#806932;">Catat pemasukan dan pengeluaran, pantau tabungan, lalu unduh rekap keuanganmu.</p>
+              </td></tr></table>
+              <p style="margin:24px 0 8px;font-size:12px;line-height:20px;color:#687b99;">Tombol tidak bisa dibuka? Salin dan tempel tautan berikut ke browser:</p>
+              <p style="margin:0;font-size:11px;line-height:18px;word-break:break-all;overflow-wrap:anywhere;"><a href="{{ .ConfirmationURL }}" style="color:#245ce5;text-decoration:underline;word-break:break-all;">{{ .ConfirmationURL }}</a></p>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:20px 14px 0;text-align:center;">
+          <p style="margin:0 0 8px;font-size:12px;line-height:20px;color:#7183a0;">Jika kamu tidak mendaftar di SakuPintar, abaikan email ini.<br>Jangan bagikan tautan verifikasi kepada orang lain.</p>
+          <p style="margin:0;font-size:11px;line-height:18px;color:#8a9ab2;">Email otomatis dari SakuPintar.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

@@ -11,7 +11,7 @@
     "test:account": "node --test tests/account-utils.mjs && node tests/account-db.mjs",
     "test:history": "node --test tests/history.mjs",
     "test:features": "node --test tests/history.mjs tests/preferences.mjs",
-    "test:statistics": "node --test tests/statistics.mjs",
+    "test:statistics": "node --test tests/statistics.mjs tests/school-report.mjs",
     "test:maintenance": "node --test tests/auth-redirect.mjs && node tests/maintenance-db.mjs",
     "test:auth": "node --test tests/auth-limits.mjs tests/auth-redirect.mjs"
   },
