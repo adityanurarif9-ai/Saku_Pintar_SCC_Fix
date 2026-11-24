@@ -37,7 +37,7 @@ export default function AuthScreen({ recovery = false, onRecovered, adminAccess 
   }
   useEffect(() => {
     const labels = { login: 'Masuk', signup: 'Daftar', forgot: 'Lupa Password', reset: 'Password Baru' };
-    document.title = `${labels[mode]} — SakuPintar`;
+    document.title = mode === 'login' ? 'SakuPintar — Catatan Keuangan dan Uang Saku Pelajar' : `${labels[mode]} — SakuPintar`;
   }, [mode]);
   const titles = { login: 'Selamat datang kembali!', signup: 'Mulai langkah pintarmu.', forgot: 'Lupa password?', reset: 'Buat password baru.' };
   const captions = { login: 'Masuk untuk mengatur uang saku dan melanjutkan target tabunganmu.', signup: 'Buat akun dan mulai kelola keuanganmu sendiri.', forgot: 'Kami akan mengirim tautan pemulihan ke emailmu.', reset: 'Pilih password yang kuat untuk menjaga akunmu.' };
@@ -97,6 +97,7 @@ export default function AuthScreen({ recovery = false, onRecovered, adminAccess 
       <p className="auth-footnote">Admin dan pengguna masuk melalui halaman yang sama. Akses mengikuti peran akun.</p>
     </section>
     <InstallApp compact />
+    <p className="auth-tagline"><a href="/tentang.html">Kenali fitur SakuPintar</a></p>
     <p className="auth-tagline">Sedikit demi sedikit, jadi berarti.</p>
   </main></div>;
 }
