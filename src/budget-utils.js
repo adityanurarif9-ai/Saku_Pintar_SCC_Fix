@@ -17,5 +17,7 @@ export function historyTotals(rows) {
 
 export function sortTransactions(rows, order) {
   const dateKey = row => (row.date || '').split('/').reverse().join('');
-  return [...rows].sort((a, b) => order === 'largest' ? b.amount - a.amount : order === 'oldest' ? dateKey(a).localeCompare(dateKey(b)) : dateKey(b).localeCompare(dateKey(a)));
+  // Snapshot order is newest first, including transactions recorded on the same date.
+  if (order === 'oldest') return sortTransactions(rows, 'newest').reverse();
+  return [...rows].sort((a, b) => order === 'largest' ? b.amount - a.amount : dateKey(b).localeCompare(dateKey(a)));
 }

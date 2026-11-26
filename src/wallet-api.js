@@ -1,7 +1,8 @@
 import { supabase } from './supabase';
+import { readWithTimeout } from './read-timeout';
 export const emptyWallet = { balance: 0, income: 0, expense: 0, goals: [], activities: [] };
 export async function loadWallet() {
-  const { data, error } = await supabase.rpc('wallet_snapshot');
+  const { data, error } = await readWithTimeout(signal => supabase.rpc('wallet_snapshot').abortSignal(signal));
   if (error) throw error;
   return data;
 }
@@ -22,6 +23,7 @@ export async function submitWallet(type, form) {
   return data;
 }
 export function walletMessage(error) {
+  if (error?.code === 'READ_TIMEOUT') return 'Pemuatan data terlalu lama. Periksa koneksi lalu coba lagi.';
   // Only show known validation messages; don't expose server diagnostics.
   const known = ['Saldo tidak cukup.', 'Nominal tidak valid.', 'Nama wajib diisi.', 'Target tabungan tidak ditemukan.', 'Nominal awal melebihi target.', 'Transfer melebihi sisa target.', 'Kategori tidak valid.', 'Maintenance sedang berlangsung. Coba lagi setelah pembaruan selesai.'];
   return known.includes(error?.message) ? error.message : 'Data belum berhasil disimpan atau dimuat. Periksa koneksi lalu coba lagi.';

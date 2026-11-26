@@ -5,6 +5,7 @@ import LoadingScreen from './Loading';
 import { avatarUrl as loadAvatarUrl } from './account-api';
 import MaintenanceScreen from './Maintenance';
 import { requiresMaintenance } from './runtime-utils';
+import { readWithTimeout } from './read-timeout';
 
 export default function AuthGate({ children, runtime }) {
   const [session, setSession] = useState(null);
@@ -25,19 +26,19 @@ export default function AuthGate({ children, runtime }) {
       if (event === 'PASSWORD_RECOVERY') setRecovery(true);
       if (event === 'SIGNED_OUT') { setRecovery(false); setProfile(null); }
     });
-    supabase.auth.getSession().then(({ data, error }) => {
+    readWithTimeout(() => supabase.auth.getSession()).then(({ data, error }) => {
       if (!active || authEvent) return;
       if (error && !authLinkIssue) setProblem('Sesi belum bisa diperiksa. Coba muat ulang.');
       else setSession(data.session);
       setChecking(false);
-    }).catch(() => { if (active) { setProblem('Tidak dapat memeriksa sesi. Periksa koneksi internet.'); setChecking(false); } });
+    }).catch(() => { if (active && !authEvent) { setProblem('Tidak dapat memeriksa sesi. Periksa koneksi internet lalu coba lagi.'); setChecking(false); } });
     return () => { active = false; subscription.unsubscribe(); };
   }, []);
   useEffect(() => {
     setProfile(current => current?.id === session?.user.id ? current : null);
     if (!session) return;
     let active = true;
-    supabase.from('profiles').select('*').eq('id', session.user.id).single().then(({ data, error }) => {
+    readWithTimeout(signal => supabase.from('profiles').select('*').eq('id', session.user.id).single().abortSignal(signal)).then(({ data, error }) => {
       if (!active) return;
       if (error || !data || !['admin', 'user'].includes(data.role)) setProblem('Profil belum dapat dimuat. Periksa koneksi atau minta pengelola menyelesaikan konfigurasi database.');
       else { setProfile(data); setProblem(''); }

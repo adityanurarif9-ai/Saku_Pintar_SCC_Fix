@@ -6,3 +6,14 @@ test('budget uses Jakarta month, excludes transfers and includes today',()=>{con
 test('overspend and invalid limit never suggest negative allowance',()=>{assert.equal(budgetSummary(rows,50000,new Date('2026-11-03')).over,30000);assert.equal(budgetSummary(rows,0).valid,false);assert.equal(budgetSummary(rows,50000,new Date('2026-11-03')).daily,0);});
 test('last day and leap year day count',()=>{assert.equal(budgetSummary([],1000,new Date('2028-02-29T08:00:00Z')).daysLeft,1);});
 test('history totals distinguish savings and sorting does not mutate input',()=>{assert.deepEqual(historyTotals(rows),{income:200000,expense:130000,transfer:90000});assert.equal(sortTransactions(rows,'oldest')[0].date,'31/10/2026');assert.equal(sortTransactions(rows,'largest')[0].amount,200000);assert.equal(rows[0].amount,80000);assert.deepEqual(historyTotals([]),{income:0,expense:0,transfer:0});});
+
+
+test('oldest history reverses the snapshot sequence for transactions on the same day', () => {
+  const rows = [
+    { id: 'new', date: '26/11/2026', amount: 20 },
+    { id: 'old', date: '26/11/2026', amount: 10 },
+    { id: 'previous', date: '25/11/2026', amount: 5 },
+  ];
+  assert.deepEqual(sortTransactions(rows, 'oldest').map(row => row.id), ['previous', 'old', 'new']);
+  assert.deepEqual(rows.map(row => row.id), ['new', 'old', 'previous']);
+});
